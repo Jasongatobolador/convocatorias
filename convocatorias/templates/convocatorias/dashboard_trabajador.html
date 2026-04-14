@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panel trabajador</title>
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/trabajador.css' %}">
+</head>
+<body class="trabajador">
+
+<nav class="topbar">
+    <div class="brand">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Ayuntamiento de Acapulco">
+        <span>Panel de trabajador</span>
+    </div>
+    <div class="topbar-actions">
+        <a class="link-pill" href="{% url 'dashboard_trabajador' %}">Dashboard</a>
+        <a class="link-pill" href="{% url 'logout' %}">Cerrar sesion</a>
+    </div>
+</nav>
+
+<main class="trabajador-wrap">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="feedback">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="panel">
+        <h1>Dashboard trabajador</h1>
+        <div class="stats">
+            <div class="stat"><strong>Convocatorias activas:</strong> {{ convocatorias_activas }}</div>
+            <div class="stat"><strong>Pendientes:</strong> {{ pendientes_count }}</div>
+            <div class="stat"><strong>Aceptadas:</strong> {{ aceptadas_count }}</div>
+            <div class="stat"><strong>Rechazadas/Vencidas:</strong> {{ rechazadas_count }}</div>
+        </div>
+        <form method="get" class="filters">
+            {{ form.area }}
+            {{ form.convocatoria }}
+            {{ form.fecha }}
+            {{ form.estado }}
+            <button class="btn" type="submit">Filtrar</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Pendientes</h2>
+        <div class="table">
+            {% for item in pendientes %}
+                <div class="row">
+                    <span>{{ item.inscripcion.convocatoria.titulo }}</span>
+                    <span>{{ item.inscripcion.usuario.username }}</span>
+                    <span>
+                        {{ item.fecha_envio|date:"d/m/Y H:i" }} - Area {{ item.area_asignada|default:"Sin area" }}
+                        {% if item.reenvios > 0 %} - Reenvio #{{ item.reenvios|add:"1" }}{% endif %}
+                    </span>
+                    <a class="btn btn-outline" href="{% url 'revisar_solicitud_trabajador' item.id %}">Revisar</a>
+                </div>
+            {% empty %}
+                <p>Sin pendientes.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Aceptados</h2>
+        <div class="table">
+            {% for item in aceptadas %}
+                <div class="row">
+                    <span>{{ item.inscripcion.convocatoria.titulo }}</span>
+                    <span>{{ item.inscripcion.usuario.username }}</span>
+                    <span>Cita: {{ item.fecha_cita|date:"d/m/Y H:i" }}</span>
+                    <span>Ficha: {{ item.numero_ficha }}</span>
+                </div>
+            {% empty %}
+                <p>Sin aceptados.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Rechazados / Vencidos</h2>
+        <div class="table">
+            {% for item in rechazadas %}
+                <div class="row">
+                    <span>{{ item.inscripcion.convocatoria.titulo }}</span>
+                    <span>{{ item.inscripcion.usuario.username }}</span>
+                    <span>{{ item.get_estado_display }}</span>
+                    <a class="btn btn-outline" href="{% url 'revisar_solicitud_trabajador' item.id %}">Ver detalle</a>
+                </div>
+            {% empty %}
+                <p>Sin rechazados.</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

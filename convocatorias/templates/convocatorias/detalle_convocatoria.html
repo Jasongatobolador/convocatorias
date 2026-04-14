@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ convocatoria.titulo }}</title>
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}?v=20260215b">
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/detalle.css' %}">
+</head>
+<body class="detalle-page">
+
+<nav class="topbar">
+    <div class="brand">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Ayuntamiento de Acapulco">
+        <span>Convocatorias Digitales</span>
+    </div>
+    <div class="topbar-actions">
+        <a class="link-pill" href="{% url 'lista_convocatorias' %}">Volver a convocatorias</a>
+        <div class="user-menu">
+            <button class="user-btn" type="button">
+                <span class="user-avatar">US</span>
+                <span class="user-name">Mi cuenta</span>
+            </button>
+            <div class="user-dropdown">
+                <a href="{% url 'zona_usuario' %}">Perfil y documentos</a>
+                <a href="{% url 'logout' %}">Cerrar sesion</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-inner">
+        <h1 class="hero-title">{{ convocatoria.titulo }}</h1>
+        <p class="hero-sub">{{ convocatoria.dependencia }}</p>
+    </div>
+</header>
+
+<main class="detalle">
+    <div class="info-card">
+        <h3>Descripcion</h3>
+        <p>{{ convocatoria.descripcion }}</p>
+
+        <h3>Objetivo</h3>
+        <p>{{ convocatoria.objetivo }}</p>
+
+        <h3>Dirigida a</h3>
+        <p>{{ convocatoria.dirigido_a }}</p>
+
+        <h3>Requisitos</h3>
+        <p>{{ convocatoria.requisitos }}</p>
+
+        <h3>Beneficios</h3>
+        <p>{{ convocatoria.beneficios }}</p>
+
+        <h3>Periodo de convocatoria</h3>
+        <p>{{ convocatoria.fecha_inicio }} - {{ convocatoria.fecha_fin }}</p>
+
+        <h3>Periodo de recepcion de documentos</h3>
+        {% if convocatoria.fecha_inicio_recepcion and convocatoria.fecha_fin_recepcion %}
+            <p>{{ convocatoria.fecha_inicio_recepcion }} - {{ convocatoria.fecha_fin_recepcion }}</p>
+        {% else %}
+            <p>{{ convocatoria.fecha_inicio }} - {{ convocatoria.fecha_fin }}</p>
+        {% endif %}
+
+        <h3>Lugar de recepcion</h3>
+        <p>{{ convocatoria.lugar_recepcion }}</p>
+
+        <h3>Horario</h3>
+        <p>{{ convocatoria.horario }}</p>
+
+        <h3>Forma de entrega</h3>
+        <p>{{ convocatoria.forma_entrega }}</p>
+
+        <h3>Contacto</h3>
+        <p>{{ convocatoria.contacto }}</p>
+    </div>
+
+    <section class="detalle-extra">
+        <div class="detalle-card">
+            <h4>Revision documental por personal autorizado</h4>
+            <p>
+                Tu solicitud y documentos se enviaran al equipo de trabajadores para su evaluacion.
+                Recibiras el resultado en el apartado de Perfil y documentos, dentro de tus notificaciones.
+            </p>
+        </div>
+        <div class="detalle-card">
+            <h4>Estado de documentos</h4>
+            <p>Documentos requeridos para esta convocatoria:</p>
+            {% if mensajes_documentos %}
+                <p class="doc-summary">
+                    Antes de acudir, revisa cuantas copias debes entregar y si tambien debes presentar el original.
+                </p>
+            {% endif %}
+            <div class="doc-health">
+                <span class="doc-pill {% if documentos_completos %}ok{% else %}warn{% endif %}">
+                    {% if documentos_completos %}Documentos completos{% else %}Documentos pendientes{% endif %}
+                </span>
+            </div>
+            <ul>
+                {% for documento in documentos_requeridos %}
+                    <li>
+                        <div>
+                            <strong>{{ documento.nombre }}</strong>
+                            <div class="doc-meta">{{ documento.mensaje }}</div>
+                        </div>
+                        <span class="doc-state {% if documento.completo %}ok{% else %}warn{% endif %}">
+                            {% if documento.completo %}Completo{% else %}Pendiente{% endif %}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <div class="cta-wrap">
+        <form
+            method="post"
+            id="formUnirse"
+            action="{% url 'unirse_convocatoria' convocatoria.id %}"
+            data-documentos-completos="{% if documentos_completos %}true{% else %}false{% endif %}"
+        >
+            {% csrf_token %}
+            <button id="inscribirse" class="btn" type="submit">Unirse a convocatoria</button>
+        </form>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="footer-logo">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Logo Ayuntamiento">
+        <p>SERVIR CON HONESTIDAD Y JUSTICIA</p>
+        <p>Av. Cuauhtemoc S/N, Interior Parque Papagayo, Fracc. Hornos.</p>
+        <p>Tel: 744 440 7000 | oficinavirtual@acapulco.gob.mx</p>
+    </div>
+
+    <div class="footer-emergencia">
+        <h4>Telefonos de Emergencia</h4>
+        <ul>
+            <li>911 - Servicio de Emergencias</li>
+            <li>089 - Denuncia Anonima</li>
+            <li>073 - CAPAMA</li>
+            <li>072 - Proteccion Civil</li>
+            <li>071 - CFE</li>
+        </ul>
+    </div>
+
+    <div class="footer-mapa">
+        <h4>Mapa de la Ciudad</h4>
+        <a href="https://www.google.com/maps/place/Acapulco,+Gro." target="_blank" rel="noopener noreferrer">
+            <img src="{% static 'convocatorias/img/mapa-acapulco.png' %}" alt="Mapa de Acapulco">
+        </a>
+    </div>
+
+    <div class="footer-legal">
+        <a href="#">Terminos y Condiciones de Uso</a> |
+        <a href="#">Avisos de Privacidad</a>
+        <p>&copy; 2024-2027 H. Ayuntamiento de Acapulco de Juarez</p>
+    </div>
+</footer>
+
+<script src="{% static 'convocatorias/js/detalle.js' %}" defer></script>
+</body>
+</html>

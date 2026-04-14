@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de documentos</title>
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/usuario.css' %}">
+</head>
+<body class="usuario">
+
+<nav class="topbar">
+    <div class="brand">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Ayuntamiento de Acapulco">
+        <span>Convocatorias Digitales</span>
+    </div>
+    <div class="topbar-actions">
+        <a class="link-pill" href="{% url 'zona_usuario' %}">Zona de usuario</a>
+        <div class="user-menu">
+            <button class="user-btn" type="button">
+                <span class="user-avatar">US</span>
+                <span class="user-name">Usuario</span>
+            </button>
+            <div class="user-dropdown">
+                <a href="{% url 'zona_usuario' %}">Perfil y documentos</a>
+                <a href="{% url 'logout' %}">Cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header class="hero compacto">
+    <h1>Gestión de documentos</h1>
+    <p>Sube, valida y administra tus archivos personales.</p>
+</header>
+
+<main class="main-wrap">
+    <section class="panel">
+        <h2 class="section-title">Documentos requeridos</h2>
+        <div class="table-list">
+            <div class="table-row">
+                <strong>Identificación oficial</strong>
+                <span>PDF, JPG o PNG</span>
+                <span class="badge ok">Validado</span>
+            </div>
+            <div class="table-row">
+                <strong>Comprobante de domicilio</strong>
+                <span>Vigencia 3 meses</span>
+                <span class="badge warn">Falta</span>
+            </div>
+            <div class="table-row">
+                <strong>CURP</strong>
+                <span>Formato actualizado</span>
+                <span class="badge ok">Validado</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" style="margin-top: 22px;">
+        <h2 class="section-title">Subir documentos</h2>
+        <div class="upload-box">
+            <p>Arrastra tus archivos aquí o selecciona desde tu equipo.</p>
+            <button class="btn" type="button">Seleccionar archivos</button>
+        </div>
+        <div class="helper">El sistema valida el formato y guarda cada documento de forma segura.</div>
+    </section>
+</main>
+
+</body>
+</html>

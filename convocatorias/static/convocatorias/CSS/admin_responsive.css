@@ -1,0 +1,70 @@
+@media (max-width: 900px) {
+    #content {
+        padding-inline: 12px;
+    }
+
+    .submit-row {
+        display: grid;
+        gap: 8px;
+    }
+
+    .submit-row input,
+    .submit-row a {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .inline-group .tabular tbody th,
+    .inline-group .tabular tbody td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .inline-group .tabular tbody tr {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #d9d9d9;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+    }
+
+    .inline-group .tabular .original {
+        padding-left: 0;
+    }
+
+    .inline-group .tabular td fieldset {
+        margin: 0;
+    }
+
+    .inline-group .tabular td.delete {
+        padding-top: 8px;
+    }
+
+    .inline-group .tabular input[type="text"],
+    .inline-group .tabular input[type="number"],
+    .inline-group .tabular select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .module table,
+    .results {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .aligned label {
+        width: auto;
+        float: none;
+        margin-right: 0;
+    }
+
+    .aligned .form-row {
+        padding-left: 0;
+    }
+}

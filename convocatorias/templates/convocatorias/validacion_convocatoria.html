@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Validación de convocatoria</title>
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/usuario.css' %}">
+</head>
+<body class="usuario">
+
+<nav class="topbar">
+    <div class="brand">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Ayuntamiento de Acapulco">
+        <span>Convocatorias Digitales</span>
+    </div>
+    <div class="topbar-actions">
+        <a class="link-pill" href="{% url 'lista_convocatorias' %}">Convocatorias</a>
+        <a class="link-pill" href="{% url 'zona_usuario' %}">Zona de usuario</a>
+    </div>
+</nav>
+
+<header class="hero compacto">
+    <h1>Validación de registro</h1>
+    <p>Revisamos tu sesión y documentos antes de confirmar la inscripción.</p>
+</header>
+
+<main class="main-wrap">
+    <section class="panel">
+        <h2 class="section-title">Estado de validación</h2>
+        <div class="notice ok">Autenticación correcta. Documentación completa.</div>
+
+        <div class="grid-3" style="margin-top: 18px;">
+            <div class="step-card">
+                <h4>Sesión activa</h4>
+                <p>Acceso verificado.</p>
+                <span class="badge ok">OK</span>
+            </div>
+            <div class="step-card">
+                <h4>Documentos base</h4>
+                <p>Todos los archivos requeridos están validados.</p>
+                <span class="badge ok">OK</span>
+            </div>
+            <div class="step-card">
+                <h4>Documento extra</h4>
+                <p>Esta convocatoria no requiere adicionales.</p>
+                <span class="badge ok">OK</span>
+            </div>
+        </div>
+
+        <div class="actions" style="margin-top: 18px;">
+            <button class="btn" type="button">Confirmar registro</button>
+            <a class="btn btn-outline" href="{% url 'gestion_documentos' %}">Ver documentos</a>
+        </div>
+    </section>
+
+    <section class="panel" style="margin-top: 22px;">
+        <h2 class="section-title">Si falta documentación</h2>
+        <p>El sistema pausará el registro y te mostrará qué archivo falta.</p>
+        <div class="notice">Ejemplo: falta comprobante de domicilio o documento adicional.</div>
+        <div class="actions" style="margin-top: 12px;">
+            <a class="btn btn-outline" href="{% url 'documentos_faltantes' %}">Ir a documentos faltantes</a>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

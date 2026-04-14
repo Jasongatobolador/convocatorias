@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Convocatorias</title>
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'convocatorias/CSS/lista.css' %}">
+</head>
+<body class="lista">
+
+<nav class="topbar">
+    <div class="brand">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Ayuntamiento de Acapulco">
+        <span>Convocatorias Digitales</span>
+    </div>
+    <div class="topbar-actions">
+        <button class="theme-toggle" id="themeToggle" type="button">
+            <span>Modo oscuro</span>
+        </button>
+        <div class="user-menu">
+            <button class="user-btn" type="button">
+                <span class="user-avatar">US</span>
+                <span class="user-name">Mi cuenta</span>
+            </button>
+            <div class="user-dropdown">
+                <a href="{% url 'zona_usuario' %}">Perfil y documentos</a>
+                <a href="{% url 'logout' %}">Cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <h1>Convocatorias</h1>
+    <p>Apoyos y programas disponibles</p>
+</header>
+
+<section class="intro">
+    <div class="intro-card">
+        <p>
+            Centraliza tus datos, valida tus documentos una sola vez y participa en convocatorias
+            sin repetir procesos. La plataforma protege tu información y te guía paso a paso.
+        </p>
+        <div class="flow-grid">
+            <div class="flow-card">
+                <h4>1. Acceso seguro</h4>
+                <p>Inicia sesión o regístrate con validaciones de seguridad.</p>
+            </div>
+            <div class="flow-card">
+                <h4>2. Perfil completo</h4>
+                <p>Sube documentos y mantén tus datos actualizados.</p>
+            </div>
+            <div class="flow-card">
+                <h4>3. Registro rápido</h4>
+                <p>La plataforma valida y te registra solo si todo está correcto.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contenedor">
+
+    <div class="lista-grid">
+        {% for convocatoria in convocatorias %}
+        <article class="card">
+
+            <div class="card-bg"
+                data-bg="{% if convocatoria.imagen %}
+                            {{ convocatoria.imagen.url }}
+                         {% else %}
+                            {% static 'convocatorias/img/fondo_convocatoria.webp' %}
+                         {% endif %}">
+            </div>
+
+            <div class="card-content">
+                <h2>{{ convocatoria.titulo }}</h2>
+                <p>{{ convocatoria.descripcion|truncatechars:90 }}</p>
+
+                <div class="cupo-info">
+                    {% if convocatoria.cupo_maximo <= 0 %}
+                        <span class="cupo-pill cupo-pill--llena">Sin cupo disponible</span>
+                    {% else %}
+                        {% if convocatoria.estado_cupo == "llena" %}
+                            <span class="cupo-pill cupo-pill--llena">Convocatoria llena</span>
+                        {% elif convocatoria.estado_cupo == "pocos" %}
+                            <span class="cupo-pill cupo-pill--pocos">Pocos lugares</span>
+                        {% else %}
+                            <span class="cupo-pill cupo-pill--disponible">Disponible</span>
+                        {% endif %}
+                        <div class="cupo-metricas">
+                            Capacidad: {{ convocatoria.cupo_maximo }} |
+                            Inscritos: {{ convocatoria.inscritos }} |
+                            Disponibles: {{ convocatoria.cupos_disponibles }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'detalle_convocatoria' convocatoria.id %}" class="btn">
+                    Ver convocatoria
+                </a>
+            </div>
+
+        </article>
+        {% empty %}
+        <div class="empty-state">
+            <p>No hay convocatorias disponibles</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</section>
+
+<script src="{% static 'convocatorias/js/lista.js' %}" defer></script>
+<script src="{% static 'convocatorias/js/theme.js' %}" defer></script>
+</body>
+</html>
