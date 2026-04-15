@@ -626,42 +626,47 @@ def unirse_convocatoria_view(request, id):
     guard = _final_user_required(request)
     if guard:
         return guard
+
     convocatoria = get_object_or_404(Convocatoria, id=id)
     requeridos = _documentos_requeridos_para_convocatoria(convocatoria)
 
     docs = DocumentoUsuario.objects.filter(usuario=request.user, archivo_tamano__gt=0)
     docs_por_tipo = {doc.tipo: doc for doc in docs}
     faltantes = [req.nombre for req in requeridos if req.codigo not in docs_por_tipo]
+
     if faltantes:
         messages.error(request, f"Debes cargar tus documentos antes de unirte: {', '.join(faltantes)}")
         return redirect("zona_usuario")
 
+    # 🔍 BUSCAR INSCRIPCIÓN
     inscripcion = Inscripcion.objects.filter(
         convocatoria=convocatoria,
         usuario=request.user,
         estado=Inscripcion.Estado.ACTIVA,
     ).first()
 
+    # 🆕 CREAR INSCRIPCIÓN SI NO EXISTE
     if inscripcion is None:
         try:
             with transaction.atomic():
                 convocatoria = Convocatoria.objects.select_for_update().get(pk=convocatoria.pk)
+
                 if not convocatoria.activa:
                     messages.error(request, "La convocatoria no esta activa.")
                     return redirect("detalle_convocatoria", id=convocatoria.id)
+
                 if convocatoria.cupo_maximo <= 0:
-                    messages.error(
-                        request,
-                        "La convocatoria no tiene cupo de citas configurado. Verifica las fechas y capacidad diaria.",
-                    )
+                    messages.error(request, "La convocatoria no tiene cupo disponible.")
                     return redirect("detalle_convocatoria", id=convocatoria.id)
-                if convocatoria.cupo_maximo > 0:
-                    inscritos = convocatoria.inscripciones.filter(
-                        estado=Inscripcion.Estado.ACTIVA
-                    ).count()
-                    if inscritos >= convocatoria.cupo_maximo:
-                        messages.error(request, "La convocatoria esta llena.")
-                        return redirect("detalle_convocatoria", id=convocatoria.id)
+
+                inscritos = convocatoria.inscripciones.filter(
+                    estado=Inscripcion.Estado.ACTIVA
+                ).count()
+
+                if inscritos >= convocatoria.cupo_maximo:
+                    messages.error(request, "La convocatoria esta llena.")
+                    return redirect("detalle_convocatoria", id=convocatoria.id)
+
                 inscripcion = Inscripcion.objects.create(
                     convocatoria=convocatoria,
                     usuario=request.user,
@@ -669,66 +674,104 @@ def unirse_convocatoria_view(request, id):
                     ip_registro=_get_client_ip(request),
                     user_agent=request.META.get("HTTP_USER_AGENT", "")[:255],
                 )
+
         except Exception as exc:
             _registrar_auditoria(
                 request,
                 "error_registro_convocatoria",
-                "Error inesperado al registrar una solicitud.",
-                datos={
-                    "convocatoria_id": convocatoria.id,
-                    "error": exc.__class__.__name__,
-                },
+                "Error al registrar solicitud.",
+                datos={"convocatoria_id": convocatoria.id},
             )
-            messages.error(request, "No fue posible registrar tu solicitud. Intenta nuevamente.")
+            messages.error(request, "No fue posible registrar tu solicitud.")
             return redirect("detalle_convocatoria", id=convocatoria.id)
 
-    solicitud, created = SolicitudRevision.objects.get_or_create(inscripcion=inscripcion)
-    trabajador_asignado, area_asignada = _asignar_trabajador_para_solicitud()
-    if not trabajador_asignado:
-        messages.error(request, "No hay trabajadores activos para revisar solicitudes.")
-        return redirect("detalle_convocatoria", id=convocatoria.id)
+    # 🔴 VALIDAR SOLICITUD EXISTENTE
+    solicitud_existente = SolicitudRevision.objects.filter(inscripcion=inscripcion).first()
 
-    if solicitud.estado == SolicitudRevision.Estado.RECHAZADA and solicitud.plazo_correccion_limite:
-        if solicitud.plazo_correccion_limite < timezone.now():
-            solicitud.estado = SolicitudRevision.Estado.VENCIDA
-            solicitud.inscripcion.estado = Inscripcion.Estado.CANCELADA
-            solicitud.inscripcion.save(update_fields=["estado"])
-            solicitud.save(update_fields=["estado"])
-            messages.error(request, "Tu plazo de correccion vencio. Debes iniciar un nuevo proceso.")
+    if solicitud_existente:
+        # ❌ BLOQUEAR si está pendiente o aceptada
+        if solicitud_existente.estado in [
+            SolicitudRevision.Estado.PENDIENTE,
+            SolicitudRevision.Estado.ACEPTADA,
+        ]:
+            messages.error(request, "Ya tienes una solicitud activa en esta convocatoria.")
             return redirect("detalle_convocatoria", id=convocatoria.id)
+
+        # ❌ BLOQUEAR si fue rechazada definitivamente
+        if solicitud_existente.estado == SolicitudRevision.Estado.VENCIDA:
+            messages.error(request, "Tu solicitud fue rechazada definitivamente.")
+            return redirect("detalle_convocatoria", id=convocatoria.id)
+
+        # ❌ BLOQUEAR si trabajador ya negó reenvío
+        if solicitud_existente.estado == SolicitudRevision.Estado.RECHAZADA and solicitud_existente.reenvios > 0:
+            messages.error(request, "Tu solicitud fue rechazada sin posibilidad de reenvio.")
+            return redirect("detalle_convocatoria", id=convocatoria.id)
+
+        # ⏰ VALIDAR PLAZO
+        if solicitud_existente.estado == SolicitudRevision.Estado.RECHAZADA:
+            if solicitud_existente.plazo_correccion_limite and solicitud_existente.plazo_correccion_limite < timezone.now():
+                solicitud_existente.estado = SolicitudRevision.Estado.VENCIDA
+                solicitud_existente.inscripcion.estado = Inscripcion.Estado.CANCELADA
+                solicitud_existente.inscripcion.save(update_fields=["estado"])
+                solicitud_existente.save(update_fields=["estado"])
+
+                messages.error(request, "Tu plazo de correccion vencio.")
+                return redirect("detalle_convocatoria", id=convocatoria.id)
+
+    # ✅ CREAR O REUTILIZAR
+    solicitud = solicitud_existente if solicitud_existente else SolicitudRevision(inscripcion=inscripcion)
+    created = solicitud.id is None
+
+    # ✅ ASIGNAR TRABAJADOR SOLO SI ES NUEVA
+    if created:
+        trabajador_asignado, area_asignada = _asignar_trabajador_para_solicitud()
+
+        if not trabajador_asignado:
+            messages.error(request, "No hay trabajadores disponibles.")
+            return redirect("detalle_convocatoria", id=convocatoria.id)
+
+        solicitud.trabajador_asignado = trabajador_asignado
+        solicitud.area_asignada = area_asignada
+
+    # 🔁 REENVÍO CONTROLADO
+    if solicitud_existente and solicitud_existente.estado == SolicitudRevision.Estado.RECHAZADA:
         solicitud.reenvios += 1
 
+    # ✅ ACTUALIZAR DATOS
     solicitud.estado = SolicitudRevision.Estado.PENDIENTE
     solicitud.fecha_envio = timezone.now()
     solicitud.motivo_rechazo = ""
     solicitud.plazo_correccion_limite = None
     solicitud.fecha_revision = None
     solicitud.revisado_por = None
-    solicitud.trabajador_asignado = trabajador_asignado
-    solicitud.area_asignada = area_asignada
     solicitud.documentos_snapshot = _build_documentos_snapshot(request.user, convocatoria=convocatoria)
+
     solicitud.save()
+
+    # 📢 AUDITORÍA
     _registrar_auditoria(
         request,
         "solicitud_enviada",
         "Solicitud enviada a revision.",
         datos={
             "convocatoria_id": convocatoria.id,
-            "convocatoria_titulo": convocatoria.titulo,
             "solicitud_id": solicitud.id,
         },
     )
 
+    # 🔔 NOTIFICACIÓN
     NotificacionUsuario.objects.create(
         usuario=request.user,
         titulo="Solicitud enviada",
-        mensaje=f"Tu documentacion fue enviada para revision en la convocatoria {convocatoria.titulo}.",
+        mensaje=f"Tu documentacion fue enviada para revision en {convocatoria.titulo}.",
     )
 
+    # ✅ MENSAJE FINAL
     if created:
-        messages.success(request, "Te uniste a la convocatoria. Tu solicitud quedo en pendiente de revision.")
+        messages.success(request, "Te uniste correctamente. Solicitud en revision.")
     else:
-        messages.success(request, "Solicitud reenviada correctamente para revision.")
+        messages.success(request, "Solicitud reenviada correctamente.")
+
     return redirect("detalle_convocatoria", id=convocatoria.id)
 
 
