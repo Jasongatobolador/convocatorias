@@ -167,9 +167,12 @@ class Convocatoria(models.Model):
         return max(min(int(self.personas_maximas_por_dia), slots_por_horario), 0)
 
     def save(self, *args, **kwargs):
-        hoy = timezone.localdate()
-        if self.fecha_inicio and self.fecha_fin:
+        # Solo calcular activa automáticamente al CREAR la convocatoria.
+        # Al editar, se respeta el valor que el admin guardó manualmente.
+        if self._state.adding and self.fecha_inicio and self.fecha_fin:
+            hoy = timezone.localdate()
             self.activa = self.fecha_inicio <= hoy <= self.fecha_fin
+
         self.horario = self.HORARIO_RECEPCION_FIJO
         self.hora_recepcion_inicio = time(10, 0)
         self.hora_recepcion_fin = time(14, 0)
@@ -690,6 +693,3 @@ def notificar_eliminacion_documento_catalogo(sender, instance, **kwargs):
         "Documento eliminado",
         f"El documento '{instance.nombre}' fue eliminado del catalogo y se retiro de tu panel.",
     )
-
-
-
