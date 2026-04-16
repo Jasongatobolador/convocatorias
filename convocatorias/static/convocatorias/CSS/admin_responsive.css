@@ -1,3 +1,5 @@
+/* admin_responsive.css — versión corregida para tema oscuro */
+
 @media (max-width: 900px) {
     #content {
         padding-inline: 12px;
@@ -25,10 +27,11 @@
     .inline-group .tabular tbody tr {
         display: block;
         margin-bottom: 12px;
-        border: 1px solid #d9d9d9;
+        border: 1px solid rgba(212,175,55,0.25);
         border-radius: 8px;
         padding: 10px;
-        background: #fff;
+        /* Antes era background: #fff — cambiado a tema oscuro */
+        background: rgba(74,24,24,0.4);
     }
 
     .inline-group .tabular .original {
