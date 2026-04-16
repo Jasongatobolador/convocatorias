@@ -837,6 +837,9 @@ def dashboard_trabajador_view(request):
         "pendientes": pendientes[:100],
         "aceptadas": aceptadas[:100],
         "rechazadas": rechazadas[:100],
+        "pendientes_total": pendientes.count(),
+        "aceptadas_total": aceptadas.count(),
+        "rechazadas_total": rechazadas.count(),
     }
     return render(request, "convocatorias/dashboard_trabajador.html", context)
 
@@ -884,6 +887,20 @@ def revisar_solicitud_trabajador_view(request, solicitud_id):
     if request.method == "POST":
         accion = request.POST.get("accion")
         convocatoria = solicitud.inscripcion.convocatoria
+
+        # ── GUARD: bloquear re-procesamiento de solicitudes ya cerradas ───────
+        estados_cerrados = [
+            SolicitudRevision.Estado.ACEPTADA,
+            SolicitudRevision.Estado.VENCIDA,
+        ]
+        if solicitud.estado in estados_cerrados:
+            messages.error(
+                request,
+                f"Esta solicitud ya fue procesada ({solicitud.get_estado_display()}). "
+                "No se puede modificar.",
+            )
+            return redirect("dashboard_trabajador")
+        # ─────────────────────────────────────────────────────────────────────
 
         if accion == "aceptar":
             if convocatoria.cupo_maximo > 0:
@@ -1391,13 +1408,27 @@ def password_reset_view(request):
                 f"Codigo de verificacion: {codigo}\n"
                 "Este codigo vence en pocos minutos."
             )
-            send_mail(
-                asunto,
-                mensaje,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=True,
-            )
+            try:
+                send_mail(
+                    asunto,
+                    mensaje,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+            except Exception as mail_exc:
+                import logging
+                logging.getLogger(__name__).error(
+                    "Error al enviar correo de recuperacion a %s: %s",
+                    email,
+                    mail_exc,
+                )
+                _registrar_auditoria(
+                    request,
+                    "error_envio_correo_reset",
+                    "Fallo el envio del correo de recuperacion de contrasena.",
+                    datos={"email": email, "error": str(mail_exc)},
+                )
         messages.success(
             request,
             "Si el correo existe, se envio un codigo de verificacion. Revisa tu bandeja.",
