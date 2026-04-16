@@ -7,231 +7,247 @@
 <div id="content-main">
 
 {% if app_list %}
-<div class="admin-index-grid">
 
-    <!-- Columna izquierda: módulos / tarjetas -->
-    <div class="admin-modules">
+<div class="admin-panel-grid">
+
+    <!-- Tarjetas de modelos (2 por fila) -->
+    <div class="admin-cards-area">
         {% for app in app_list %}
-        <div class="module admin-card">
-            <caption>
-                <a href="{{ app.app_url }}" class="section">
-                    {{ app.name }}
-                </a>
-            </caption>
             {% for model in app.models %}
-            <div class="admin-model-row">
-                <div class="admin-model-name">
-                    {% if model.admin_url %}
-                        <a href="{{ model.admin_url }}">{{ model.name }}</a>
-                    {% else %}
-                        <span>{{ model.name }}</span>
-                    {% endif %}
+            <div class="model-card">
+                <div class="model-card-header">
+                    <span class="model-card-icon">
+                        {% if 'area' in model.object_name|lower %}🏢
+                        {% elif 'convocatoria' in model.object_name|lower %}📋
+                        {% elif 'documento' in model.object_name|lower %}📄
+                        {% elif 'evento' in model.object_name|lower or 'auditoria' in model.object_name|lower %}🔍
+                        {% elif 'trabajador' in model.object_name|lower or 'perfil' in model.object_name|lower %}👷
+                        {% else %}📁{% endif %}
+                    </span>
+                    <span class="model-card-title">{{ model.name }}</span>
                 </div>
-                <div class="admin-model-actions">
-                    {% if model.add_url %}
-                        <a href="{{ model.add_url }}" class="addlink">{% trans 'Agregar' %}</a>
-                    {% endif %}
-                    {% if model.admin_url %}
-                        {% if model.view_only %}
-                            <a href="{{ model.admin_url }}" class="viewlink">{% trans 'Ver' %}</a>
-                        {% else %}
-                            <a href="{{ model.admin_url }}" class="changelink">{% trans 'Gestionar' %}</a>
+                <div class="model-card-body">
+                    <p class="model-card-app">{{ app.name }}</p>
+                    <div class="model-card-actions">
+                        {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="mc-btn mc-btn-add">
+                            ✚ {% trans "Agregar nuevo" %}
+                        </a>
                         {% endif %}
-                    {% endif %}
+                        {% if model.admin_url %}
+                            {% if model.view_only %}
+                            <a href="{{ model.admin_url }}" class="mc-btn mc-btn-manage">
+                                👁 {% trans "Ver registros" %}
+                            </a>
+                            {% else %}
+                            <a href="{{ model.admin_url }}" class="mc-btn mc-btn-manage">
+                                ⚙ {% trans "Gestionar" %}
+                            </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             {% endfor %}
-        </div>
         {% endfor %}
     </div>
 
-    <!-- Columna derecha: acciones recientes -->
-    <div class="admin-sidebar">
-        <div class="module admin-card" id="recent-actions-module">
-            <caption>{% trans 'Acciones recientes' %}</caption>
-            {% load log %}
-            {% get_admin_log 10 as admin_log for_user user %}
-            {% if not admin_log %}
-                <p class="admin-no-recent">{% trans 'Sin acciones recientes' %}</p>
-            {% else %}
-                <ul class="admin-recent-list">
-                {% for entry in admin_log %}
-                <li class="admin-recent-item">
-                    {% if entry.is_deletion or not entry.get_admin_url %}
-                        <span class="admin-recent-title">{{ entry.object_repr }}</span>
-                    {% else %}
-                        <a href="{{ entry.get_admin_url }}" class="admin-recent-title">{{ entry.object_repr }}</a>
-                    {% endif %}
-                    <span class="admin-recent-type
-                        {% if entry.is_addition %}action-add
-                        {% elif entry.is_change %}action-change
-                        {% elif entry.is_deletion %}action-delete
-                        {% endif %}">
-                        {% if entry.is_addition %}➕{% elif entry.is_change %}✏️{% elif entry.is_deletion %}🗑️{% endif %}
-                        {{ entry.content_type.name|capfirst }}
-                    </span>
-                </li>
-                {% endfor %}
-                </ul>
-            {% endif %}
+    <!-- Acciones recientes -->
+    <div class="admin-recent-panel">
+        <div class="recent-card">
+            <div class="recent-card-header">🕐 {% trans "Acciones recientes" %}</div>
+            <div class="recent-card-body">
+                {% load log %}
+                {% get_admin_log 12 as admin_log for_user user %}
+                {% if not admin_log %}
+                    <p class="recent-empty">{% trans "Sin acciones recientes" %}</p>
+                {% else %}
+                    <ul class="recent-list">
+                    {% for entry in admin_log %}
+                    <li class="recent-item">
+                        <span class="recent-badge {% if entry.is_addition %}badge-add{% elif entry.is_change %}badge-edit{% elif entry.is_deletion %}badge-del{% endif %}">
+                            {% if entry.is_addition %}+{% elif entry.is_change %}✎{% elif entry.is_deletion %}✕{% endif %}
+                        </span>
+                        <div class="recent-info">
+                            {% if entry.is_deletion or not entry.get_admin_url %}
+                                <span class="recent-name">{{ entry.object_repr }}</span>
+                            {% else %}
+                                <a href="{{ entry.get_admin_url }}" class="recent-name">{{ entry.object_repr }}</a>
+                            {% endif %}
+                            <span class="recent-type">{{ entry.content_type.name|capfirst }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-</div><!-- /.admin-index-grid -->
+</div>
 {% else %}
-<p class="admin-empty-msg">
-    {% blocktrans trimmed %}
-        No tienes permiso para editar ningún elemento. Contacta al administrador del sistema.
-    {% endblocktrans %}
-</p>
+<div class="admin-empty">
+    <p>{% blocktrans trimmed %}Sin acceso a secciones. Contacta al administrador.{% endblocktrans %}</p>
+</div>
 {% endif %}
 
-</div><!-- /#content-main -->
+</div>
 
 <style>
-/* ── Panel principal (index) ─────────────────────────────── */
-.admin-index-grid {
+/* Ocultar sidebar en el panel principal (se repite la info) */
+body.dashboard #nav-sidebar,
+body.dashboard .toggle-nav-sidebar,
+body.dashboard #toggle-nav-sidebar { display: none !important; }
+body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
+
+/* Layout */
+.admin-panel-grid {
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 24px;
-    padding: 24px 0;
+    grid-template-columns: 1fr 300px;
+    gap: 28px;
+    padding: 8px 0 32px;
     align-items: start;
 }
-
-.admin-modules {
+.admin-cards-area {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
 /* Tarjeta */
-.admin-card {
-    background: var(--adm-tarjeta, rgba(255,255,255,0.07)) !important;
-    border: 1px solid var(--adm-borde, rgba(212,175,55,0.35)) !important;
-    border-radius: 14px !important;
-    box-shadow: var(--adm-sombra, 0 8px 32px rgba(0,0,0,0.35)) !important;
-    overflow: hidden !important;
-    margin-bottom: 0 !important;
-    backdrop-filter: blur(6px) !important;
+.model-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-
-.admin-card caption {
-    display: block !important;
-    background: linear-gradient(135deg, var(--adm-rojo, #7b2d2d) 0%, var(--adm-rojo-medio, #6a2525) 100%) !important;
-    color: var(--adm-dorado, #d4af37) !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.92rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    padding: 12px 16px !important;
-    border-bottom: 1px solid var(--adm-borde, rgba(212,175,55,0.35)) !important;
-    text-align: left !important;
+.model-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.45);
 }
-
-.admin-card caption a {
-    color: var(--adm-dorado, #d4af37) !important;
-    text-decoration: none !important;
-    font-weight: 800 !important;
+.model-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 18px 14px;
+    background: linear-gradient(135deg, #5c1f1f 0%, #7b2d2d 100%);
+    border-bottom: 2px solid rgba(212,175,55,0.4);
 }
-
-/* Filas de modelo */
-.admin-model-row {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 9px 14px !important;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.1) !important;
-    transition: background 0.15s !important;
+.model-card-icon { font-size: 1.4rem; line-height: 1; }
+.model-card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #d4af37;
+    letter-spacing: 0.3px;
 }
-.admin-model-row:last-child { border-bottom: none !important; }
-.admin-model-row:hover { background: rgba(255,255,255,0.05) !important; }
-
-.admin-model-name a,
-.admin-model-name span {
-    color: var(--adm-texto, #f5e6c8) !important;
-    font-size: 0.88rem !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
+.model-card-body { padding: 16px 18px 20px; }
+.model-card-app {
+    font-size: 0.72rem;
+    color: rgba(245,230,200,0.4);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 14px;
 }
-.admin-model-name a:hover { color: var(--adm-dorado, #d4af37) !important; }
+.model-card-actions { display: flex; flex-direction: column; gap: 9px; }
 
-.admin-model-actions {
-    display: flex !important;
-    gap: 8px !important;
+.mc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.15s;
 }
-
-.admin-model-actions a {
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-    border-radius: 20px !important;
-    text-decoration: none !important;
-    transition: opacity 0.2s !important;
-}
-.admin-model-actions a:hover { opacity: 0.8 !important; }
-
-.addlink {
-    background: var(--adm-dorado, #d4af37) !important;
+.mc-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.mc-btn-add {
+    background: linear-gradient(180deg, #d4af37 0%, #b8942a 100%);
     color: #3a1a1a !important;
 }
-.changelink, .viewlink {
-    background: rgba(212,175,55,0.15) !important;
-    color: var(--adm-dorado, #d4af37) !important;
-    border: 1px solid rgba(212,175,55,0.4) !important;
+.mc-btn-manage {
+    background: rgba(212,175,55,0.12);
+    color: #d4af37 !important;
+    border: 1px solid rgba(212,175,55,0.45);
 }
 
-/* Sidebar — acciones recientes */
-.admin-sidebar .admin-card { width: 100% !important; }
-
-.admin-no-recent {
-    color: rgba(245,230,200,0.5) !important;
-    font-size: 0.85rem !important;
-    padding: 16px !important;
-    text-align: center !important;
+/* Panel acciones recientes */
+.recent-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 20px;
 }
-
-.admin-recent-list {
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
+.recent-card-header {
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #5c1f1f 0%, #7b2d2d 100%);
+    border-bottom: 2px solid rgba(212,175,55,0.4);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: #d4af37;
 }
-
-.admin-recent-item {
-    padding: 10px 14px !important;
-    border-bottom: 1px solid rgba(212,175,55,0.1) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
+.recent-card-body {
+    max-height: 520px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212,175,55,0.3) transparent;
 }
-.admin-recent-item:last-child { border-bottom: none !important; }
-
-.admin-recent-title {
-    color: var(--adm-texto, #f5e6c8) !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-    display: block !important;
+.recent-empty {
+    padding: 20px 18px;
+    color: rgba(245,230,200,0.4);
+    font-size: 0.85rem;
+    text-align: center;
+    margin: 0;
 }
-.admin-recent-title:hover { color: var(--adm-dorado, #d4af37) !important; }
-
-.admin-recent-type {
-    font-size: 0.72rem !important;
-    color: rgba(245,230,200,0.55) !important;
+.recent-list { list-style: none; margin: 0; padding: 0; }
+.recent-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(212,175,55,0.08);
+    transition: background 0.15s;
 }
-.admin-recent-type.action-add    { color: #a8f0c8 !important; }
-.admin-recent-type.action-change { color: var(--adm-dorado, #d4af37) !important; }
-.admin-recent-type.action-delete { color: #ffaaaa !important; }
-
-.admin-empty-msg {
-    color: rgba(245,230,200,0.6) !important;
-    text-align: center !important;
-    padding: 40px !important;
+.recent-item:last-child { border-bottom: none; }
+.recent-item:hover { background: rgba(255,255,255,0.04); }
+.recent-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 800;
+    flex-shrink: 0;
 }
+.badge-add  { background: rgba(76,175,132,0.25); color: #a8f0cc; border: 1px solid rgba(76,175,132,0.5); }
+.badge-edit { background: rgba(212,175,55,0.2);  color: #d4af37; border: 1px solid rgba(212,175,55,0.4); }
+.badge-del  { background: rgba(192,57,43,0.25);  color: #ffaaaa; border: 1px solid rgba(192,57,43,0.5); }
+.recent-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.recent-name {
+    font-size: 0.84rem; font-weight: 600; color: #f5e6c8;
+    text-decoration: none; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; display: block;
+}
+a.recent-name:hover { color: #d4af37; }
+.recent-type { font-size: 0.72rem; color: rgba(245,230,200,0.45); font-weight: 600; }
+.admin-empty { text-align: center; padding: 60px 20px; color: rgba(245,230,200,0.5); }
 
-/* Responsive */
-@media (max-width: 900px) {
-    .admin-index-grid { grid-template-columns: 1fr !important; }
-    .admin-modules    { grid-template-columns: 1fr !important; }
+@media (max-width: 960px) {
+    .admin-panel-grid  { grid-template-columns: 1fr; }
+    .admin-cards-area  { grid-template-columns: 1fr; }
+    .recent-card       { position: static; }
 }
 </style>
 {% endblock %}
