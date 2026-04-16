@@ -1,269 +1,207 @@
-{% extends "admin/base_site.html" %}
 {% load i18n static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zona de Administrador — Área de Desarrollo Económico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-{% block extrastyle %}
-{{ block.super }}
-<style>
-/* ── Login admin — Zona de Administrador ────────────────── */
-html, body {
-    min-height: 100vh;
-    background: linear-gradient(180deg, #5c1f1f 0%, #7b2d2d 50%, #5c1f1f 100%) !important;
-    display: flex;
-    flex-direction: column;
-}
+        html, body {
+            min-height: 100vh;
+            background: linear-gradient(160deg, #5c1f1f 0%, #7b2d2d 50%, #5c1f1f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Nunito', sans-serif;
+            padding: 30px 20px;
+        }
 
-/* Oculta header/breadcrumbs en el login */
-#header { display: none !important; }
-div.breadcrumbs { display: none !important; }
+        /* ── Tarjeta central ────────────────────────────── */
+        .card {
+            width: 100%;
+            max-width: 430px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(212,175,55,0.55);
+            border-radius: 22px;
+            padding: 44px 40px 38px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            animation: aparecer 0.65s ease;
+        }
 
-#content-main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 30px 20px;
-}
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-/* ── Tarjeta de login ──────────────────────────────────── */
-.login-card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(212, 175, 55, 0.6);
-    border-radius: 22px;
-    padding: 44px 42px 38px;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.45);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    animation: fadeInUp 0.7s ease;
-}
+        /* ── Cabecera ───────────────────────────────────── */
+        .cabecera { text-align: center; margin-bottom: 32px; }
+        .icono { font-size: 3rem; display: block; margin-bottom: 12px; }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+        .titulo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #d4af37;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
 
-/* ── Cabecera de la tarjeta ───────────────────────────── */
-.login-header {
-    text-align: center;
-    margin-bottom: 32px;
-}
+        .subtitulo {
+            font-size: 0.88rem;
+            color: rgba(245,230,200,0.72);
+        }
 
-.login-icon {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 12px;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
-}
+        /* ── Campos ─────────────────────────────────────── */
+        .campo { margin-bottom: 18px; }
 
-.login-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #d4af37;
-    margin: 0 0 4px;
-    letter-spacing: 0.3px;
-}
+        .campo label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #f5e6c8;
+            margin-bottom: 7px;
+        }
 
-.login-sub {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.88rem;
-    color: rgba(245, 230, 200, 0.75);
-    margin: 0;
-}
+        .input-wrap { position: relative; }
 
-/* ── Campos del formulario ────────────────────────────── */
-.form-group {
-    margin-bottom: 18px;
-}
+        .campo input {
+            width: 100%;
+            background: rgba(255,255,255,0.09);
+            border: 1px solid rgba(212,175,55,0.42);
+            border-radius: 12px;
+            color: #fff;
+            padding: 11px 44px 11px 14px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.97rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
 
-.form-group label {
-    display: block;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #f5e6c8;
-    margin-bottom: 7px;
-}
+        .campo input:focus {
+            border-color: #d4af37;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.22);
+        }
 
-.input-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
+        /* ── Botón ojo ──────────────────────────────────── */
+        .ojo {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.05rem;
+            color: rgba(212,175,55,0.7);
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .ojo:hover { color: #d4af37; }
 
-.input-wrap input {
-    width: 100%;
-    background: rgba(255,255,255,0.09) !important;
-    border: 1px solid rgba(212, 175, 55, 0.4) !important;
-    border-radius: 12px !important;
-    color: #ffffff !important;
-    padding: 11px 44px 11px 14px !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-size: 0.97rem !important;
-    transition: border-color 0.2s, box-shadow 0.2s !important;
-    box-sizing: border-box !important;
-}
+        /* ── Error ──────────────────────────────────────── */
+        .error-box {
+            background: rgba(192,57,43,0.2);
+            border: 1px solid rgba(192,57,43,0.5);
+            border-radius: 12px;
+            color: #ffaaaa;
+            padding: 11px 14px;
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
 
-.input-wrap input:focus {
-    border-color: #d4af37 !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2) !important;
-}
+        /* ── Botón login ────────────────────────────────── */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(180deg, #d4af37 0%, #b8942a 100%);
+            color: #5c1f1f;
+            border: none;
+            border-radius: 30px;
+            padding: 13px 0;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="cabecera">
+            <span class="icono">🛡️</span>
+            <p class="titulo">Zona de Administrador</p>
+            <p class="subtitulo">Área de Desarrollo Económico</p>
+        </div>
 
-/* ── Botón ojo (toggle contraseña) ────────────────────── */
-.toggle-pass {
-    position: absolute;
-    right: 13px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    color: rgba(212, 175, 55, 0.75);
-    font-size: 1.05rem;
-    display: flex;
-    align-items: center;
-    transition: color 0.2s;
-    z-index: 2;
-}
+        {% if form.errors %}
+        <div class="error-box">
+            Credenciales incorrectas. Verifica tu usuario y contraseña.
+        </div>
+        {% endif %}
 
-.toggle-pass:hover { color: #d4af37; }
+        {% if user_is_anonymous %}
+        <form method="post" action="{{ app_path }}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
 
-/* ── Errores ──────────────────────────────────────────── */
-.errornote {
-    background: rgba(192, 57, 43, 0.2) !important;
-    border: 1px solid rgba(192, 57, 43, 0.5) !important;
-    border-radius: 12px !important;
-    color: #ffaaaa !important;
-    padding: 10px 14px !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-size: 0.9rem !important;
-    margin-bottom: 16px !important;
-}
+            <div class="campo">
+                <label for="id_username">Usuario</label>
+                <div class="input-wrap">
+                    <input
+                        type="text"
+                        name="username"
+                        id="id_username"
+                        autocomplete="username"
+                        autofocus
+                        maxlength="254"
+                        placeholder="Nombre de usuario"
+                        value="{{ form.username.value|default:'' }}"
+                    >
+                </div>
+            </div>
 
-/* ── Botón de login ───────────────────────────────────── */
-.btn-login {
-    width: 100%;
-    background: linear-gradient(180deg, #d4af37 0%, #b8942a 100%);
-    color: #5c1f1f;
-    border: none;
-    border-radius: 30px;
-    padding: 13px 0;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 1rem;
-    letter-spacing: 0.4px;
-    cursor: pointer;
-    margin-top: 8px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-    transition: opacity 0.2s, transform 0.15s;
-}
+            <div class="campo">
+                <label for="id_password">Contraseña</label>
+                <div class="input-wrap">
+                    <input
+                        type="password"
+                        name="password"
+                        id="id_password"
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                    >
+                    <button type="button" class="ojo" id="btnOjo" title="Ver contraseña">👁</button>
+                </div>
+            </div>
 
-.btn-login:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-/* Oculta elementos innecesarios del admin login por defecto */
-.login #header,
-.login .help-block { display: none !important; }
-</style>
-{% endblock %}
-
-{% block content_title %}{% endblock %}
-
-{% block content %}
-<div id="content-main">
-  <div class="login-card">
-
-    <div class="login-header">
-      <span class="login-icon">🛡️</span>
-      <h1 class="login-title">Zona de Administrador</h1>
-      <p class="login-sub">Área de Desarrollo Económico</p>
+            <button type="submit" class="btn-login">Iniciar sesión</button>
+        </form>
+        {% endif %}
     </div>
 
-    {% if form.errors %}
-      <p class="errornote">
-        {% if form.errors.items|length == 1 %}
-          Credenciales incorrectas. Verifica tu usuario y contraseña.
-        {% else %}
-          Por favor corrige los errores marcados.
-        {% endif %}
-      </p>
-    {% endif %}
-
-    {% if user_is_anonymous %}
-    <form method="post" action="{{ app_path }}" id="login-form">
-      {% csrf_token %}
-      <input type="hidden" name="next" value="{{ next }}">
-
-      <div class="form-group">
-        <label for="id_username">{% trans "Usuario" %}</label>
-        <div class="input-wrap">
-          <input
-            type="text"
-            name="username"
-            id="id_username"
-            autocomplete="username"
-            autofocus
-            maxlength="254"
-            placeholder="Correo o nombre de usuario"
-            value="{{ form.username.value|default:'' }}"
-          >
-        </div>
-        {% if form.username.errors %}
-          <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
-            {{ form.username.errors|join:", " }}
-          </p>
-        {% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="id_password">{% trans "Contraseña" %}</label>
-        <div class="input-wrap">
-          <input
-            type="password"
-            name="password"
-            id="id_password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-          >
-          <button
-            type="button"
-            class="toggle-pass"
-            id="togglePass"
-            aria-label="Mostrar u ocultar contraseña"
-            title="Ver contraseña"
-          >👁</button>
-        </div>
-        {% if form.password.errors %}
-          <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
-            {{ form.password.errors|join:", " }}
-          </p>
-        {% endif %}
-      </div>
-
-      <button type="submit" class="btn-login">
-        Iniciar sesión
-      </button>
-
-    </form>
-    {% endif %}
-
-  </div>
-</div>
-
-<script>
-(function () {
-    var btn   = document.getElementById('togglePass');
-    var campo = document.getElementById('id_password');
-    if (!btn || !campo) return;
-    btn.addEventListener('click', function () {
-        var esPassword = campo.type === 'password';
-        campo.type     = esPassword ? 'text' : 'password';
-        btn.textContent = esPassword ? '🙈' : '👁';
-        btn.title       = esPassword ? 'Ocultar contraseña' : 'Ver contraseña';
-    });
-})();
-</script>
-{% endblock %}
+    <script>
+        (function () {
+            var btn   = document.getElementById('btnOjo');
+            var campo = document.getElementById('id_password');
+            if (!btn || !campo) return;
+            btn.addEventListener('click', function () {
+                var esPass = campo.type === 'password';
+                campo.type     = esPass ? 'text' : 'password';
+                btn.textContent = esPass ? '🙈' : '👁';
+                btn.title       = esPass ? 'Ocultar contraseña' : 'Ver contraseña';
+            });
+        })();
+    </script>
+</body>
+</html>
