@@ -1,0 +1,269 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+/* ── Login admin — Zona de Administrador ────────────────── */
+html, body {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #5c1f1f 0%, #7b2d2d 50%, #5c1f1f 100%) !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Oculta header/breadcrumbs en el login */
+#header { display: none !important; }
+div.breadcrumbs { display: none !important; }
+
+#content-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 30px 20px;
+}
+
+/* ── Tarjeta de login ──────────────────────────────────── */
+.login-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(212, 175, 55, 0.6);
+    border-radius: 22px;
+    padding: 44px 42px 38px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: fadeInUp 0.7s ease;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Cabecera de la tarjeta ───────────────────────────── */
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+.login-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #d4af37;
+    margin: 0 0 4px;
+    letter-spacing: 0.3px;
+}
+
+.login-sub {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    color: rgba(245, 230, 200, 0.75);
+    margin: 0;
+}
+
+/* ── Campos del formulario ────────────────────────────── */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #f5e6c8;
+    margin-bottom: 7px;
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrap input {
+    width: 100%;
+    background: rgba(255,255,255,0.09) !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    border-radius: 12px !important;
+    color: #ffffff !important;
+    padding: 11px 44px 11px 14px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 0.97rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    box-sizing: border-box !important;
+}
+
+.input-wrap input:focus {
+    border-color: #d4af37 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2) !important;
+}
+
+/* ── Botón ojo (toggle contraseña) ────────────────────── */
+.toggle-pass {
+    position: absolute;
+    right: 13px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: rgba(212, 175, 55, 0.75);
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+    z-index: 2;
+}
+
+.toggle-pass:hover { color: #d4af37; }
+
+/* ── Errores ──────────────────────────────────────────── */
+.errornote {
+    background: rgba(192, 57, 43, 0.2) !important;
+    border: 1px solid rgba(192, 57, 43, 0.5) !important;
+    border-radius: 12px !important;
+    color: #ffaaaa !important;
+    padding: 10px 14px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 16px !important;
+}
+
+/* ── Botón de login ───────────────────────────────────── */
+.btn-login {
+    width: 100%;
+    background: linear-gradient(180deg, #d4af37 0%, #b8942a 100%);
+    color: #5c1f1f;
+    border: none;
+    border-radius: 30px;
+    padding: 13px 0;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-login:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Oculta elementos innecesarios del admin login por defecto */
+.login #header,
+.login .help-block { display: none !important; }
+</style>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="login-card">
+
+    <div class="login-header">
+      <span class="login-icon">🛡️</span>
+      <h1 class="login-title">Zona de Administrador</h1>
+      <p class="login-sub">Área de Desarrollo Económico</p>
+    </div>
+
+    {% if form.errors %}
+      <p class="errornote">
+        {% if form.errors.items|length == 1 %}
+          Credenciales incorrectas. Verifica tu usuario y contraseña.
+        {% else %}
+          Por favor corrige los errores marcados.
+        {% endif %}
+      </p>
+    {% endif %}
+
+    {% if user_is_anonymous %}
+    <form method="post" action="{{ app_path }}" id="login-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <div class="form-group">
+        <label for="id_username">{% trans "Usuario" %}</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            name="username"
+            id="id_username"
+            autocomplete="username"
+            autofocus
+            maxlength="254"
+            placeholder="Correo o nombre de usuario"
+            value="{{ form.username.value|default:'' }}"
+          >
+        </div>
+        {% if form.username.errors %}
+          <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
+            {{ form.username.errors|join:", " }}
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_password">{% trans "Contraseña" %}</label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            name="password"
+            id="id_password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+          >
+          <button
+            type="button"
+            class="toggle-pass"
+            id="togglePass"
+            aria-label="Mostrar u ocultar contraseña"
+            title="Ver contraseña"
+          >👁</button>
+        </div>
+        {% if form.password.errors %}
+          <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
+            {{ form.password.errors|join:", " }}
+          </p>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn-login">
+        Iniciar sesión
+      </button>
+
+    </form>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+(function () {
+    var btn   = document.getElementById('togglePass');
+    var campo = document.getElementById('id_password');
+    if (!btn || !campo) return;
+    btn.addEventListener('click', function () {
+        var esPassword = campo.type === 'password';
+        campo.type     = esPassword ? 'text' : 'password';
+        btn.textContent = esPassword ? '🙈' : '👁';
+        btn.title       = esPassword ? 'Ocultar contraseña' : 'Ver contraseña';
+    });
+})();
+</script>
+{% endblock %}
