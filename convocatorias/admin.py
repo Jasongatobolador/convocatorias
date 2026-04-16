@@ -5,7 +5,10 @@ from django.forms.models import BaseInlineFormSet
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
-from django.urls import path
+from django.urls import path, reverse
+from django.shortcuts import redirect
+from django.contrib import messages as dj_messages
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.models import User
 
 from .models import (
@@ -119,7 +122,7 @@ class ConvocatoriaAdmin(admin.ModelAdmin):
 
     class Media:
         js = ("convocatorias/js/admin_convocatoria.js",)
-        css = {"all": ("convocatorias/CSS/admin_responsive.css",)}
+        css = {"all": ("convocatorias/CSS/admin_responsive.css", "convocatorias/CSS/admin_custom.css")}
 
     def get_urls(self):
         urls = super().get_urls()
@@ -168,7 +171,7 @@ class DocumentoCatalogoAdmin(admin.ModelAdmin):
     ordering = ("orden", "nombre")
 
     class Media:
-        css = {"all": ("convocatorias/CSS/admin_responsive.css",)}
+        css = {"all": ("convocatorias/CSS/admin_responsive.css", "convocatorias/CSS/admin_custom.css")}
 
 
 @admin.register(EventoAuditoria)
@@ -177,6 +180,7 @@ class EventoAuditoriaAdmin(admin.ModelAdmin):
     list_filter = ("evento", "creado_en")
     search_fields = ("evento", "descripcion", "usuario__username", "ip")
     readonly_fields = ("usuario", "evento", "descripcion", "ip", "user_agent", "datos", "creado_en")
+    actions = ["vaciar_auditoria"]
 
     def has_add_permission(self, request):
         return False
@@ -185,10 +189,60 @@ class EventoAuditoriaAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        # Solo superusuarios pueden eliminar eventos (necesario para la accion vaciar)
+        return request.user.is_superuser
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                "vaciar-auditoria/",
+                self.admin_site.admin_view(self.vaciar_auditoria_view),
+                name="eventoauditoria_vaciar",
+            ),
+            path(
+                "vaciar-auditoria/confirmar/",
+                self.admin_site.admin_view(self.vaciar_auditoria_confirmar),
+                name="eventoauditoria_vaciar_confirmar",
+            ),
+        ]
+        return custom + urls
+
+    def vaciar_auditoria_view(self, request):
+        """Pantalla de confirmacion antes de vaciar."""
+        from django.template.response import TemplateResponse
+        return TemplateResponse(
+            request,
+            "admin/eventoauditoria_vaciar_confirm.html",
+            {
+                "title": "Vaciar auditoria",
+                "total": EventoAuditoria.objects.count(),
+                "opts": self.model._meta,
+            },
+        )
+
+    def vaciar_auditoria_confirmar(self, request):
+        """Ejecuta el vaciado si el admin confirma."""
+        if request.method == "POST":
+            total, _ = EventoAuditoria.objects.all().delete()
+            dj_messages.success(
+                request,
+                f"Auditoria vaciada correctamente. Se eliminaron {total} registros.",
+            )
+        return redirect("admin:convocatorias_eventoauditoria_changelist")
+
+    @admin.action(description="Vaciar toda la auditoria")
+    def vaciar_auditoria(self, request, queryset):
+        """Accion desde el listado (ignora el queryset, vacia todo)."""
+        return redirect(reverse("admin:eventoauditoria_vaciar"))
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["vaciar_url"] = reverse("admin:eventoauditoria_vaciar")
+        return super().changelist_view(request, extra_context=extra_context)
 
     class Media:
-        css = {"all": ("convocatorias/CSS/admin_responsive.css",)}
+        css = {"all": ("convocatorias/CSS/admin_responsive.css", "convocatorias/CSS/admin_custom.css")}
 
 
 class TrabajadorPerfilAdminForm(forms.ModelForm):
@@ -256,7 +310,7 @@ class TrabajadorPerfilAdmin(admin.ModelAdmin):
     readonly_fields = ("fecha_registro",)
 
     class Media:
-        css = {"all": ("convocatorias/CSS/admin_responsive.css",)}
+        css = {"all": ("convocatorias/CSS/admin_responsive.css", "convocatorias/CSS/admin_custom.css")}
 
     @admin.display(description="Correo")
     def correo(self, obj):
@@ -289,4 +343,17 @@ class AreaAdmin(admin.ModelAdmin):
     search_fields = ("nombre",)
 
     class Media:
-        css = {"all": ("convocatorias/CSS/admin_responsive.css",)}
+        css = {"all": ("convocatorias/CSS/admin_responsive.css", "convocatorias/CSS/admin_custom.css")}
+
+# ── Ocultar modelos de autenticación de Django del panel admin ──
+# Los modelos siguen funcionando en base de datos, solo se ocultan
+# del menú del administrador ya que no son necesarios para este sistema.
+try:
+    admin.site.unregister(Group)
+except admin.sites.NotRegistered:
+    pass
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
