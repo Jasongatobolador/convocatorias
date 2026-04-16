@@ -78,7 +78,10 @@ ROOT_URLCONF = 'convocatoria.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # ⚠️ IMPORTANTE: DIRS se revisa ANTES que APP_DIRS.
+        # Sin esto, Django usa sus propios templates de admin (los feos por defecto)
+        # porque django.contrib.admin aparece antes que convocatorias en INSTALLED_APPS.
+        'DIRS': [BASE_DIR / 'convocatorias' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
