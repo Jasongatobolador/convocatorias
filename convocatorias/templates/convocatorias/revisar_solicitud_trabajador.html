@@ -23,7 +23,7 @@
 <main class="trabajador-wrap">
     {% if messages %}
         {% for message in messages %}
-            <div class="feedback">{{ message }}</div>
+            <div class="feedback {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
@@ -33,7 +33,7 @@
         <p><strong>Fecha envio:</strong> {{ solicitud.fecha_envio|date:"d/m/Y H:i" }}</p>
         <p><strong>Estado:</strong> {{ solicitud.get_estado_display }}</p>
         {% if solicitud.reenvios > 0 %}
-            <p><strong>Intento:</strong> Reenvio #{{ solicitud.reenvios|add:"1" }}</p>
+            <p><strong>Intento:</strong> Reenvio #{{ solicitud.reenvios }}</p>
         {% else %}
             <p><strong>Intento:</strong> Primer envio</p>
         {% endif %}
@@ -64,24 +64,35 @@
     </section>
 
     <section class="panel actions-panel">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="aceptar">
-            <button class="btn" type="submit">Aceptar documentacion</button>
-        </form>
+        {% if solicitud.estado == "pendiente" %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="aceptar">
+                <button class="btn" type="submit">Aceptar documentacion</button>
+            </form>
 
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="rechazar">
-            <label for="{{ rechazo_form.motivo_rechazo.id_for_label }}">Motivo rechazo (obligatorio)</label>
-            {{ rechazo_form.motivo_rechazo }}
-            <label for="{{ rechazo_form.plazo_correccion_dias.id_for_label }}">Plazo de correccion (dias)</label>
-            {{ rechazo_form.plazo_correccion_dias }}
-            <label for="{{ rechazo_form.permitir_reenvio.id_for_label }}">
-                {{ rechazo_form.permitir_reenvio }} Permitir reenvio
-            </label>
-            <button class="btn btn-danger" type="submit">Rechazar documentacion</button>
-        </form>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="rechazar">
+                <label for="{{ rechazo_form.motivo_rechazo.id_for_label }}">Motivo rechazo (obligatorio)</label>
+                {{ rechazo_form.motivo_rechazo }}
+                <label for="{{ rechazo_form.plazo_correccion_dias.id_for_label }}">Plazo de correccion (dias)</label>
+                {{ rechazo_form.plazo_correccion_dias }}
+                <label for="{{ rechazo_form.permitir_reenvio.id_for_label }}">
+                    {{ rechazo_form.permitir_reenvio }} Permitir reenvio
+                </label>
+                <button class="btn btn-danger" type="submit">Rechazar documentacion</button>
+            </form>
+        {% else %}
+            <div class="feedback info">
+                Esta solicitud ya fue procesada y no puede modificarse.
+                Estado actual: <strong>{{ solicitud.get_estado_display }}</strong>.
+                {% if solicitud.fecha_revision %}
+                    Revisada el {{ solicitud.fecha_revision|date:"d/m/Y H:i" }}
+                    {% if solicitud.revisado_por %}por {{ solicitud.revisado_por.get_full_name|default:solicitud.revisado_por.username }}{% endif %}.
+                {% endif %}
+            </div>
+        {% endif %}
     </section>
 </main>
 
