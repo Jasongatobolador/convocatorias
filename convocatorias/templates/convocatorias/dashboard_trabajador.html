@@ -24,7 +24,7 @@
 <main class="trabajador-wrap">
     {% if messages %}
         {% for message in messages %}
-            <div class="feedback">{{ message }}</div>
+            <div class="feedback {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
@@ -47,6 +47,9 @@
 
     <section class="panel">
         <h2>Pendientes</h2>
+        {% if pendientes_total > 100 %}
+            <p class="feedback warning">⚠️ Mostrando las primeras 100 de {{ pendientes_total }} solicitudes pendientes. Usa los filtros para ver las demás.</p>
+        {% endif %}
         <div class="table">
             {% for item in pendientes %}
                 <div class="row">
@@ -54,7 +57,7 @@
                     <span>{{ item.inscripcion.usuario.username }}</span>
                     <span>
                         {{ item.fecha_envio|date:"d/m/Y H:i" }} - Area {{ item.area_asignada|default:"Sin area" }}
-                        {% if item.reenvios > 0 %} - Reenvio #{{ item.reenvios|add:"1" }}{% endif %}
+                        {% if item.reenvios > 0 %} - Reenvio #{{ item.reenvios }}{% endif %}
                     </span>
                     <a class="btn btn-outline" href="{% url 'revisar_solicitud_trabajador' item.id %}">Revisar</a>
                 </div>
