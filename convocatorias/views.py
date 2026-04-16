@@ -709,14 +709,14 @@ def unirse_convocatoria_view(request, id):
 
         # ⏰ VALIDAR PLAZO
         if solicitud_existente.estado == SolicitudRevision.Estado.RECHAZADA:
-            if solicitud_existente.plazo_correccion_limite and solicitud_existente.plazo_correccion_limite < timezone.now():
-                solicitud_existente.estado = SolicitudRevision.Estado.VENCIDA
-                solicitud_existente.inscripcion.estado = Inscripcion.Estado.CANCELADA
-                solicitud_existente.inscripcion.save(update_fields=["estado"])
-                solicitud_existente.save(update_fields=["estado"])
-
-                messages.error(request, "Tu plazo de correccion vencio.")
-                return redirect("detalle_convocatoria", id=convocatoria.id)
+           if solicitud_existente.estado in [
+               SolicitudRevision.Estado.PENDIENTE,
+               SolicitudRevision.Estado.ACEPTADA,
+           ]:
+               return render(request, "convocatorias/detalle_convocatoria.html", {
+                   "convocatoria": convocatoria,
+                   "modal_mensaje": "Ya estas unido a esta convocatoria. Espera la revision en notificaciones."
+               })
 
     # ✅ CREAR O REUTILIZAR
     solicitud = solicitud_existente if solicitud_existente else SolicitudRevision(inscripcion=inscripcion)
