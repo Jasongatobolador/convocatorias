@@ -197,7 +197,34 @@
             </div>
         {% endfor %}
         {% for noti in notificaciones %}
-            <p>{{ noti.fecha_creacion|date:"d/m/Y H:i" }} - <strong>{{ noti.titulo }}</strong>: {{ noti.mensaje }}</p>
+            {% if "aceptada" in noti.titulo %}
+                <div class="noti noti-aceptada">
+                    <span class="noti-icono">✅</span>
+                    <div class="noti-body">
+                        <strong>{{ noti.titulo }}</strong>
+                        <span class="noti-fecha">{{ noti.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        <p>{{ noti.mensaje }}</p>
+                    </div>
+                </div>
+            {% elif "rechazada" in noti.titulo %}
+                <div class="noti noti-rechazada">
+                    <span class="noti-icono">❌</span>
+                    <div class="noti-body">
+                        <strong>{{ noti.titulo }}</strong>
+                        <span class="noti-fecha">{{ noti.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        <p>{{ noti.mensaje }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="noti noti-info">
+                    <span class="noti-icono">📋</span>
+                    <div class="noti-body">
+                        <strong>{{ noti.titulo }}</strong>
+                        <span class="noti-fecha">{{ noti.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        <p>{{ noti.mensaje }}</p>
+                    </div>
+                </div>
+            {% endif %}
         {% empty %}
             <p>No hay notificaciones disponibles.</p>
         {% endfor %}
