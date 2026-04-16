@@ -164,6 +164,14 @@ div.breadcrumbs { display: none !important; }
     transform: translateY(-1px);
 }
 
+/* Oculta el ojito nativo que Django 4.2+ inyecta en el campo password */
+.login [data-action="toggle-password"],
+button[data-action="toggle-password"],
+.login #id_password + button,
+.login .input-wrap button:not(.btn-login) {
+    display: none !important;
+}
+
 /* Oculta elementos innecesarios del admin login por defecto */
 .login #header,
 .login .help-block { display: none !important; }
@@ -227,13 +235,6 @@ div.breadcrumbs { display: none !important; }
             autocomplete="current-password"
             placeholder="••••••••"
           >
-          <button
-            type="button"
-            class="toggle-pass"
-            id="togglePass"
-            aria-label="Mostrar u ocultar contraseña"
-            title="Ver contraseña"
-          >👁</button>
         </div>
         {% if form.password.errors %}
           <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
@@ -250,18 +251,4 @@ div.breadcrumbs { display: none !important; }
 
   </div>
 </div>
-
-<script>
-(function () {
-    var btn   = document.getElementById('togglePass');
-    var campo = document.getElementById('id_password');
-    if (!btn || !campo) return;
-    btn.addEventListener('click', function () {
-        var esPassword = campo.type === 'password';
-        campo.type     = esPassword ? 'text' : 'password';
-        btn.textContent = esPassword ? '🙈' : '👁';
-        btn.title       = esPassword ? 'Ocultar contraseña' : 'Ver contraseña';
-    });
-})();
-</script>
 {% endblock %}
