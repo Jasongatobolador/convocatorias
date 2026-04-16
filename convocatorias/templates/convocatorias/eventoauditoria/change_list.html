@@ -1,0 +1,27 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a
+            href="{{ vaciar_url }}"
+            class="button"
+            style="
+                background: linear-gradient(180deg,#c0392b,#922b21) !important;
+                color:#fff !important;
+                border-radius:30px !important;
+                padding:8px 20px !important;
+                font-weight:800 !important;
+                font-size:0.88rem !important;
+                text-decoration:none !important;
+                display:inline-flex !important;
+                align-items:center !important;
+                gap:6px !important;
+            "
+            title="Eliminar todos los registros de auditoría"
+        >
+            🗑️ Vaciar auditoría
+        </a>
+    </li>
+{% endblock %}
