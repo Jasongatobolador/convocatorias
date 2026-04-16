@@ -7,58 +7,8 @@
     <title>{{ convocatoria.titulo }}</title>
     <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}?v=20260215b">
     <link rel="stylesheet" href="{% static 'convocatorias/CSS/detalle.css' %}">
-
-    <style>
-        /* Modal */
-        .modal {
-            display: block;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            margin: 15% auto;
-            width: 300px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .modal-content button {
-            margin-top: 10px;
-            padding: 8px 15px;
-            border: none;
-            background: #2e7d32;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
 </head>
-
 <body class="detalle-page">
-
-<!-- 🔴 MODAL -->
-{% if modal_mensaje %}
-<div id="modalAdvertencia" class="modal">
-    <div class="modal-content">
-        <p>{{ modal_mensaje }}</p>
-        <button onclick="cerrarModal()">Aceptar</button>
-    </div>
-</div>
-
-<script>
-function cerrarModal() {
-    document.getElementById("modalAdvertencia").style.display = "none";
-}
-</script>
-{% endif %}
 
 <nav class="topbar">
     <div class="brand">
@@ -132,47 +82,82 @@ function cerrarModal() {
             <h4>Revision documental por personal autorizado</h4>
             <p>
                 Tu solicitud y documentos se enviaran al equipo de trabajadores para su evaluacion.
-                Recibiras el resultado en el apartado de Perfil y documentos.
+                Recibiras el resultado en el apartado de Perfil y documentos, dentro de tus notificaciones.
             </p>
         </div>
-
         <div class="detalle-card">
             <h4>Estado de documentos</h4>
             <p>Documentos requeridos para esta convocatoria:</p>
-
+            {% if mensajes_documentos %}
+                <p class="doc-summary">
+                    Antes de acudir, revisa cuantas copias debes entregar y si tambien debes presentar el original.
+                </p>
+            {% endif %}
             <div class="doc-health">
                 <span class="doc-pill {% if documentos_completos %}ok{% else %}warn{% endif %}">
                     {% if documentos_completos %}Documentos completos{% else %}Documentos pendientes{% endif %}
                 </span>
             </div>
-
             <ul>
                 {% for documento in documentos_requeridos %}
-                <li>
-                    <div>
-                        <strong>{{ documento.nombre }}</strong>
-                        <div class="doc-meta">{{ documento.mensaje }}</div>
-                    </div>
-                    <span class="doc-state {% if documento.completo %}ok{% else %}warn{% endif %}">
-                        {% if documento.completo %}Completo{% else %}Pendiente{% endif %}
-                    </span>
-                </li>
+                    <li>
+                        <div>
+                            <strong>{{ documento.nombre }}</strong>
+                            <div class="doc-meta">{{ documento.mensaje }}</div>
+                        </div>
+                        <span class="doc-state {% if documento.completo %}ok{% else %}warn{% endif %}">
+                            {% if documento.completo %}Completo{% else %}Pendiente{% endif %}
+                        </span>
+                    </li>
                 {% endfor %}
             </ul>
         </div>
     </section>
 
     <div class="cta-wrap">
-        <form method="post" id="formUnirse"
-            action="{% url 'unirse_convocatoria' convocatoria.id %}">
+        <form
+            method="post"
+            id="formUnirse"
+            action="{% url 'unirse_convocatoria' convocatoria.id %}"
+            data-documentos-completos="{% if documentos_completos %}true{% else %}false{% endif %}"
+        >
             {% csrf_token %}
-            <button class="btn" type="submit">Unirse a convocatoria</button>
+            <button id="inscribirse" class="btn" type="submit">Unirse a convocatoria</button>
         </form>
     </div>
 </main>
 
 <footer class="footer">
-    <p>&copy; 2024-2027 H. Ayuntamiento de Acapulco de Juarez</p>
+    <div class="footer-logo">
+        <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Logo Ayuntamiento">
+        <p>SERVIR CON HONESTIDAD Y JUSTICIA</p>
+        <p>Av. Cuauhtemoc S/N, Interior Parque Papagayo, Fracc. Hornos.</p>
+        <p>Tel: 744 440 7000 | oficinavirtual@acapulco.gob.mx</p>
+    </div>
+
+    <div class="footer-emergencia">
+        <h4>Telefonos de Emergencia</h4>
+        <ul>
+            <li>911 - Servicio de Emergencias</li>
+            <li>089 - Denuncia Anonima</li>
+            <li>073 - CAPAMA</li>
+            <li>072 - Proteccion Civil</li>
+            <li>071 - CFE</li>
+        </ul>
+    </div>
+
+    <div class="footer-mapa">
+        <h4>Mapa de la Ciudad</h4>
+        <a href="https://www.google.com/maps/place/Acapulco,+Gro." target="_blank" rel="noopener noreferrer">
+            <img src="{% static 'convocatorias/img/mapa-acapulco.png' %}" alt="Mapa de Acapulco">
+        </a>
+    </div>
+
+    <div class="footer-legal">
+        <a href="#">Terminos y Condiciones de Uso</a> |
+        <a href="#">Avisos de Privacidad</a>
+        <p>&copy; 2024-2027 H. Ayuntamiento de Acapulco de Juarez</p>
+    </div>
 </footer>
 
 <script src="{% static 'convocatorias/js/detalle.js' %}" defer></script>
