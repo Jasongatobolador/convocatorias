@@ -665,6 +665,85 @@ button[title*="Light"],
     border-radius: 20px !important;
 }
 
+/* ── Corregir .addlink y .changelink en la barra lateral ──
+   Django los hereda del estilo global de botón (fondo dorado)
+   lo que hace el texto invisible. Acá los reseteamos a links. */
+#nav-sidebar .addlink,
+#nav-sidebar a.addlink,
+#nav-sidebar .changelink,
+#nav-sidebar a.changelink {
+    background: none !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    display: inline !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    text-decoration: none !important;
+    transform: none !important;
+    color: #d4af37 !important;
+}
+#nav-sidebar .addlink:hover,
+#nav-sidebar a.addlink:hover,
+#nav-sidebar .changelink:hover,
+#nav-sidebar a.changelink:hover {
+    opacity: 0.75 !important;
+    transform: none !important;
+    color: #f0d060 !important;
+}
+
+/* ── Acción-select (dropdown "Eliminar seleccionados") ──────
+   El texto del <select> y sus <option> era blanco sobre
+   fondo claro — invisible. Lo forzamos a legible. */
+.actions select,
+#changelist .actions select {
+    background: rgba(30,10,10,0.85) !important;
+    color: #f5e6c8 !important;
+    border: 1px solid rgba(212,175,55,0.5) !important;
+    border-radius: 10px !important;
+    padding: 7px 12px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 0.88rem !important;
+    width: auto !important;
+    min-width: 240px !important;
+    cursor: pointer !important;
+}
+.actions select option,
+#changelist .actions select option {
+    background: #3a1010 !important;
+    color: #f5e6c8 !important;
+}
+.actions select:focus,
+#changelist .actions select:focus {
+    border-color: #d4af37 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.2) !important;
+}
+
+/* ── Botón "Run" de las acciones ── */
+.actions button[type="submit"],
+.actions input[type="submit"],
+#changelist .actions button {
+    background: linear-gradient(180deg, #d4af37 0%, #b8942a 100%) !important;
+    color: #3a1a1a !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 8px 20px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+}
+
+/* ── Contador "X de N seleccionados" ── */
+.actions .action-counter,
+#changelist .action-counter,
+span.action-counter {
+    color: rgba(245,230,200,0.65) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+}
+
 /* Filas pares de tablas — sin blanco ni negro */
 #result_list tbody tr:nth-child(even) td,
 #result_list tbody tr:nth-child(even) th {
