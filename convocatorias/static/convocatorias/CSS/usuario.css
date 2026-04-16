@@ -369,3 +369,57 @@ body.usuario .topbar-actions {
         height: 60vh;
     }
 }
+
+/* ── Notificaciones con distinción visual (Ambigüedad 3) ─────────────────── */
+.noti {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid transparent;
+}
+
+.noti-icono {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.noti-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.noti-body strong {
+    font-size: 0.92rem;
+}
+
+.noti-body p {
+    margin: 0;
+    font-size: 0.88rem;
+    opacity: 0.85;
+}
+
+.noti-fecha {
+    font-size: 0.78rem;
+    opacity: 0.6;
+}
+
+.noti-aceptada {
+    background: rgba(34, 197, 94, 0.10);
+    border-left-color: #22c55e;
+}
+
+.noti-rechazada {
+    background: rgba(239, 68, 68, 0.10);
+    border-left-color: #ef4444;
+}
+
+.noti-info {
+    background: rgba(234, 179, 8, 0.10);
+    border-left-color: var(--oro, #d4a44c);
+}
