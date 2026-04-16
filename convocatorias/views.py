@@ -388,6 +388,17 @@ def home_view(request):
     return render(request, "convocatorias/home.html")
 
 
+def admin_logout_redirect_view(request):
+    """
+    Cierra cualquier sesión activa (usuario final o trabajador) y redirige
+    al login del panel de administrador. Así se evita que Django muestre
+    la tarjeta sin formulario cuando ya hay una sesión abierta.
+    """
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect("/admin/login/")
+
+
 def login_view(request):
     if request.user.is_authenticated:
         logout(request)
