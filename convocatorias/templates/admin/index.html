@@ -1,0 +1,175 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content_title %}<h1>{% trans 'Panel de Administración' %}</h1>{% endblock %}
+
+{% block content %}
+<div id="content-main">
+{% if app_list %}
+<div class="admin-panel-grid">
+
+    <div class="admin-cards-area">
+        {% for app in app_list %}
+            {% for model in app.models %}
+            <div class="model-card">
+                <div class="model-card-header">
+                    <span class="model-card-icon">
+                        {% if 'area' in model.object_name|lower %}🏢
+                        {% elif 'convocatoria' in model.object_name|lower %}📋
+                        {% elif 'documento' in model.object_name|lower %}📄
+                        {% elif 'evento' in model.object_name|lower or 'auditoria' in model.object_name|lower %}🔍
+                        {% elif 'trabajador' in model.object_name|lower or 'perfil' in model.object_name|lower %}👷
+                        {% else %}📁{% endif %}
+                    </span>
+                    <span class="model-card-title">{{ model.name }}</span>
+                </div>
+                <div class="model-card-body">
+                    <div class="model-card-actions">
+                        {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="mc-btn mc-btn-add">✚ {% trans "Agregar nuevo" %}</a>
+                        {% endif %}
+                        {% if model.admin_url %}
+                            {% if model.view_only %}
+                            <a href="{{ model.admin_url }}" class="mc-btn mc-btn-manage">👁 {% trans "Ver registros" %}</a>
+                            {% else %}
+                            <a href="{{ model.admin_url }}" class="mc-btn mc-btn-manage">⚙ {% trans "Gestionar" %}</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="admin-recent-panel">
+        <div class="recent-card">
+            <div class="recent-card-header">🕐 {% trans "Acciones recientes" %}</div>
+            <div class="recent-card-body">
+                {% load log %}
+                {% get_admin_log 14 as admin_log for_user user %}
+                {% if not admin_log %}
+                    <p class="recent-empty">{% trans "Sin acciones recientes" %}</p>
+                {% else %}
+                    <ul class="recent-list">
+                    {% for entry in admin_log %}
+                    <li class="recent-item">
+                        <span class="recent-badge {% if entry.is_addition %}badge-add{% elif entry.is_change %}badge-edit{% elif entry.is_deletion %}badge-del{% endif %}">
+                            {% if entry.is_addition %}+{% elif entry.is_change %}✎{% elif entry.is_deletion %}✕{% endif %}
+                        </span>
+                        <div class="recent-info">
+                            {% if entry.is_deletion or not entry.get_admin_url %}
+                                <span class="recent-name">{{ entry.object_repr }}</span>
+                            {% else %}
+                                <a href="{{ entry.get_admin_url }}" class="recent-name">{{ entry.object_repr }}</a>
+                            {% endif %}
+                            <span class="recent-type">{{ entry.content_type.name|capfirst }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% else %}
+<p style="color:#8896a8;text-align:center;padding:40px">Sin acceso. Contacta al administrador.</p>
+{% endif %}
+</div>
+
+<style>
+body.dashboard #nav-sidebar,
+body.dashboard .toggle-nav-sidebar,
+body.dashboard #toggle-nav-sidebar { display: none !important; }
+body.dashboard #main,
+body.dashboard #content-main { margin-left: 0 !important; padding-left: 0 !important; }
+
+.admin-panel-grid { display: grid; grid-template-columns: 1fr 290px; gap: 24px; padding: 4px 0 32px; align-items: start; }
+.admin-cards-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.model-card {
+    background: #181c27;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    transition: transform 0.2s, border-color 0.2s;
+}
+.model-card:hover { transform: translateY(-2px); border-color: rgba(79,142,247,0.3); }
+.model-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 18px 13px;
+    background: #1f2435;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.model-card-icon { font-size: 1.25rem; line-height: 1; }
+.model-card-title { font-weight: 700; font-size: 0.95rem; color: #e2e8f0; letter-spacing: -0.1px; }
+.model-card-body { padding: 16px 18px 18px; }
+.model-card-actions { display: flex; flex-direction: column; gap: 8px; }
+
+.mc-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; padding: 9px 16px; border-radius: 8px;
+    font-weight: 600; font-size: 0.85rem;
+    text-decoration: none; text-align: center;
+    transition: opacity 0.15s, transform 0.1s;
+}
+.mc-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.mc-btn-add { background: #4f8ef7; color: #fff !important; box-shadow: 0 2px 8px rgba(79,142,247,0.3); }
+.mc-btn-manage { background: rgba(79,142,247,0.1); color: #4f8ef7 !important; border: 1px solid rgba(79,142,247,0.25); }
+
+.recent-card {
+    background: #181c27;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    position: sticky;
+    top: 20px;
+}
+.recent-card-header {
+    padding: 13px 18px;
+    background: #1f2435;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #8896a8;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.recent-card-body { max-height: 520px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+.recent-empty { padding: 20px 18px; color: #8896a8; font-size: 0.85rem; text-align: center; margin: 0; }
+.recent-list { list-style: none; margin: 0; padding: 0; }
+.recent-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.1s;
+}
+.recent-item:last-child { border-bottom: none; }
+.recent-item:hover { background: rgba(255,255,255,0.02); }
+.recent-badge {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+}
+.badge-add  { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+.badge-edit { background: rgba(79,142,247,0.15); color: #4f8ef7; border: 1px solid rgba(79,142,247,0.3); }
+.badge-del  { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.recent-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.recent-name { font-size: 0.84rem; font-weight: 600; color: #e2e8f0; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+a.recent-name:hover { color: #4f8ef7; }
+.recent-type { font-size: 0.72rem; color: #8896a8; font-weight: 500; }
+
+@media (max-width: 960px) {
+    .admin-panel-grid { grid-template-columns: 1fr; }
+    .admin-cards-area { grid-template-columns: 1fr; }
+    .recent-card { position: static; }
+}
+</style>
+{% endblock %}
