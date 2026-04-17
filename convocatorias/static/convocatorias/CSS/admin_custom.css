@@ -1,6 +1,26 @@
 /* =========================
    FIXES GENERALES (AGREGADOS)
 ========================= */
+#header {
+    background: linear-gradient(135deg, #5c1f1f, #7b2d2d) !important;
+}
+
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+    --primary: #7b2d2d !important;
+    --secondary: #5c1f1f !important;
+    --header-bg: #5c1f1f !important;
+    --header-color: #d4af37 !important;
+    --link-fg: #d4af37 !important;
+    --body-bg: transparent !important;
+}
+
+body {
+    background-color: #5c1f1f !important;
+}
+
+
 
 /* Evitar que elementos se corten */
 .module {
