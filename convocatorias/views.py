@@ -167,7 +167,7 @@ def _reset_rate_limited(email, ip):
 
 
 def _generar_codigo_reset():
-    return f"{random.randint(0, 999999):06d}"
+    return f"{secrets.randbelow(1_000_000):06d}"
 
 
 def _nombre_archivo_seguro(nombre_original):
