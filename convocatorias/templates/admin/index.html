@@ -5,12 +5,11 @@
 
 {% block content %}
 <div id="content-main">
-
 {% if app_list %}
 
 <div class="admin-panel-grid">
 
-    <!-- Tarjetas de modelos (2 por fila) -->
+    <!-- Tarjetas (una por modelo) -->
     <div class="admin-cards-area">
         {% for app in app_list %}
             {% for model in app.models %}
@@ -27,7 +26,6 @@
                     <span class="model-card-title">{{ model.name }}</span>
                 </div>
                 <div class="model-card-body">
-                    <p class="model-card-app">{{ app.name }}</p>
                     <div class="model-card-actions">
                         {% if model.add_url %}
                         <a href="{{ model.add_url }}" class="mc-btn mc-btn-add">
@@ -58,7 +56,7 @@
             <div class="recent-card-header">🕐 {% trans "Acciones recientes" %}</div>
             <div class="recent-card-body">
                 {% load log %}
-                {% get_admin_log 12 as admin_log for_user user %}
+                {% get_admin_log 14 as admin_log for_user user %}
                 {% if not admin_log %}
                     <p class="recent-empty">{% trans "Sin acciones recientes" %}</p>
                 {% else %}
@@ -86,19 +84,19 @@
 
 </div>
 {% else %}
-<div class="admin-empty">
-    <p>{% blocktrans trimmed %}Sin acceso a secciones. Contacta al administrador.{% endblocktrans %}</p>
-</div>
+<p style="color:rgba(245,230,200,0.5);text-align:center;padding:40px">
+    {% blocktrans trimmed %}Sin acceso a secciones. Contacta al administrador.{% endblocktrans %}
+</p>
 {% endif %}
-
 </div>
 
 <style>
-/* Ocultar sidebar en el panel principal (se repite la info) */
+/* Ocultar sidebar en panel principal */
 body.dashboard #nav-sidebar,
 body.dashboard .toggle-nav-sidebar,
 body.dashboard #toggle-nav-sidebar { display: none !important; }
-body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
+body.dashboard #main,
+body.dashboard #content-main { margin-left: 0 !important; padding-left: 0 !important; }
 
 /* Layout */
 .admin-panel-grid {
@@ -124,10 +122,8 @@ body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
     backdrop-filter: blur(8px);
     transition: transform 0.2s, box-shadow 0.2s;
 }
-.model-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 32px rgba(0,0,0,0.45);
-}
+.model-card:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,0,0,0.45); }
+
 .model-card-header {
     display: flex;
     align-items: center;
@@ -145,14 +141,6 @@ body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
     letter-spacing: 0.3px;
 }
 .model-card-body { padding: 16px 18px 20px; }
-.model-card-app {
-    font-size: 0.72rem;
-    color: rgba(245,230,200,0.4);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin: 0 0 14px;
-}
 .model-card-actions { display: flex; flex-direction: column; gap: 9px; }
 
 .mc-btn {
@@ -200,19 +188,8 @@ body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
     font-size: 0.88rem;
     color: #d4af37;
 }
-.recent-card-body {
-    max-height: 520px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(212,175,55,0.3) transparent;
-}
-.recent-empty {
-    padding: 20px 18px;
-    color: rgba(245,230,200,0.4);
-    font-size: 0.85rem;
-    text-align: center;
-    margin: 0;
-}
+.recent-card-body { max-height: 540px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(212,175,55,0.3) transparent; }
+.recent-empty { padding: 20px 18px; color: rgba(245,230,200,0.4); font-size: 0.85rem; text-align: center; margin: 0; }
 .recent-list { list-style: none; margin: 0; padding: 0; }
 .recent-item {
     display: flex;
@@ -228,8 +205,7 @@ body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
     width: 22px; height: 22px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.7rem; font-weight: 800;
-    flex-shrink: 0;
+    font-size: 0.7rem; font-weight: 800; flex-shrink: 0;
 }
 .badge-add  { background: rgba(76,175,132,0.25); color: #a8f0cc; border: 1px solid rgba(76,175,132,0.5); }
 .badge-edit { background: rgba(212,175,55,0.2);  color: #d4af37; border: 1px solid rgba(212,175,55,0.4); }
@@ -242,12 +218,11 @@ body.dashboard #main { margin-left: 0 !important; padding-left: 0 !important; }
 }
 a.recent-name:hover { color: #d4af37; }
 .recent-type { font-size: 0.72rem; color: rgba(245,230,200,0.45); font-weight: 600; }
-.admin-empty { text-align: center; padding: 60px 20px; color: rgba(245,230,200,0.5); }
 
 @media (max-width: 960px) {
-    .admin-panel-grid  { grid-template-columns: 1fr; }
-    .admin-cards-area  { grid-template-columns: 1fr; }
-    .recent-card       { position: static; }
+    .admin-panel-grid { grid-template-columns: 1fr; }
+    .admin-cards-area { grid-template-columns: 1fr; }
+    .recent-card { position: static; }
 }
 </style>
 {% endblock %}
