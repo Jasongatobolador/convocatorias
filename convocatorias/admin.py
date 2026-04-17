@@ -338,9 +338,12 @@ class TrabajadorPerfilAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 @admin.register(Area)
 class AreaAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "activa", "fecha_registro")
-    list_filter = ("activa", "fecha_registro")
+    # "activa" se mantiene en modelo y formulario; se oculta de lista/filtros
+    # porque en la vista de areas no aporta valor y genera confusion visual.
+    list_display = ("nombre", "fecha_registro")
+    list_filter = ("fecha_registro",)
     search_fields = ("nombre",)
+    fields = ("nombre", "descripcion", "activa")
 
     class Media:
         css = {"all": ("convocatorias/CSS/admin_responsive.css", "convocatorias/CSS/admin_custom.css")}
