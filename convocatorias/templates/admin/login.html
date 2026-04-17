@@ -4,6 +4,12 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
+
+/* 🔴 OCULTAR COMPLETAMENTE SIDEBAR */
+#nav-sidebar {
+    display: none !important;
+}
+
 /* ── Login admin — Zona de Administrador ────────────────── */
 html, body {
     min-height: 100vh;
@@ -164,7 +170,7 @@ div.breadcrumbs { display: none !important; }
     transform: translateY(-1px);
 }
 
-/* Oculta el ojito nativo que Django 4.2+ inyecta en el campo password */
+/* Oculta el ojito nativo de Django */
 .login [data-action="toggle-password"],
 button[data-action="toggle-password"],
 .login #id_password + button,
@@ -172,9 +178,10 @@ button[data-action="toggle-password"],
     display: none !important;
 }
 
-/* Oculta elementos innecesarios del admin login por defecto */
+/* Oculta elementos innecesarios */
 .login #header,
 .login .help-block { display: none !important; }
+
 </style>
 {% endblock %}
 
@@ -218,11 +225,6 @@ button[data-action="toggle-password"],
             value="{{ form.username.value|default:'' }}"
           >
         </div>
-        {% if form.username.errors %}
-          <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
-            {{ form.username.errors|join:", " }}
-          </p>
-        {% endif %}
       </div>
 
       <div class="form-group">
@@ -236,11 +238,6 @@ button[data-action="toggle-password"],
             placeholder="••••••••"
           >
         </div>
-        {% if form.password.errors %}
-          <p style="color:#ffaaaa;font-size:0.82rem;margin:4px 0 0;font-family:'Nunito',sans-serif;">
-            {{ form.password.errors|join:", " }}
-          </p>
-        {% endif %}
       </div>
 
       <button type="submit" class="btn-login">
