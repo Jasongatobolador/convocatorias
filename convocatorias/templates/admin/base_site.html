@@ -6,7 +6,7 @@
 {% block branding %}
 <h1 id="site-name">
     <a href="{% url 'admin:index' %}">
-        🛡 Zona de Administrador — Área de Desarrollo Económico
+        Zona de Administrador — Área de Desarrollo Económico
     </a>
 </h1>
 {% endblock %}
@@ -15,38 +15,7 @@
 {{ block.super }}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'convocatorias/CSS/admin_custom.css' %}">
 <link rel="stylesheet" href="{% static 'convocatorias/CSS/admin_responsive.css' %}">
-<style>
-/* ── Fondo imagen igual que detalle_convocatoria ── */
-html, body {
-    background-image: url("{% static 'convocatorias/img/fondo-acapulco.png' %}") !important;
-    background-repeat: no-repeat !important;
-    background-position: center center !important;
-    background-size: cover !important;
-    background-attachment: fixed !important;
-    background-color: transparent !important;
-}
-/* Overlay rojo tenue igual que detalle */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(92, 31, 31, 0.72) !important;
-    z-index: 0;
-    pointer-events: none;
-}
-#container, #header, #content-main, #content, .colMS, #changelist, #changelist-filter {
-    position: relative;
-    z-index: 1;
-}
-/* Ocultar botón de tema claro/oscuro que Django inyecta */
-#theme-toggle,
-button[data-theme-toggle],
-.theme-switcher,
-[data-action="theme-toggle"] {
-    display: none !important;
-}
-</style>
 {% endblock %}
