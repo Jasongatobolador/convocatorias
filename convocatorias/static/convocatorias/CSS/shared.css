@@ -150,6 +150,32 @@ a { color: inherit; text-decoration: none; }
     color: #ffffff;
 }
 
+.user-dropdown form {
+    margin: 0;
+    padding: 0;
+}
+
+.user-dropdown form button {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #ffffff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    text-align: left;
+    transition: color 180ms ease, background-color 180ms ease;
+}
+
+.user-dropdown form button:hover {
+    background: rgba(255,255,255,0.08);
+    color: #ffffff;
+}
+
 .user-menu:focus-within .user-dropdown,
 .user-menu:hover .user-dropdown { display: block; }
 
