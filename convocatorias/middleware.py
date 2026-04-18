@@ -50,7 +50,7 @@ class SecurityHeadersMiddleware:
         "form-action 'self'; "
         "img-src 'self' data:; "
         "script-src 'self'; "
-        "style-src 'self' 'unsafe-inline'; "
+        "style-src 'self'; "
         "font-src 'self'; "
         "connect-src 'self'; "
         "frame-src 'self'"
