@@ -40,17 +40,18 @@ class RegistroForm(forms.Form):
         user = User.objects.create_user(username=email, email=email, password=password)
         return user
 
-
 class PerfilUsuarioForm(forms.ModelForm):
     class Meta:
         model = PerfilUsuario
         fields = ("nombre_completo", "curp", "telefono", "direccion")
-        labels = {
-            "nombre_completo": "Nombre completo",
-            "curp": "CURP",
-            "telefono": "Telefono",
-            "direccion": "Direccion",
-        }
+
+    def clean_curp(self):
+        curp = self.cleaned_data.get("curp", "").strip().upper()
+        if curp:  # Solo validar si se proporcionó
+            patron = r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$'
+            if not re.match(patron, curp):
+                raise forms.ValidationError("El CURP no tiene el formato correcto.")
+        return curp
 
 
 class SubidaDocumentoForm(forms.Form):
