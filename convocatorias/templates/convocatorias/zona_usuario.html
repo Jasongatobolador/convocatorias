@@ -24,7 +24,10 @@
             </button>
             <div class="user-dropdown">
                 <a href="{% url 'zona_usuario' %}">Zona de usuario</a>
-                <a href="{% url 'logout' %}">Cerrar sesion</a>
+                <form method="post" action="{% url 'logout' %}" style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit">Cerrar sesión</button>
+                </form>
             </div>
         </div>
     </div>
