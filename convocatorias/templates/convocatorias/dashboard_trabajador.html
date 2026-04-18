@@ -17,7 +17,10 @@
     </div>
     <div class="topbar-actions">
         <a class="link-pill" href="{% url 'dashboard_trabajador' %}">Dashboard</a>
-        <a class="link-pill" href="{% url 'logout' %}">Cerrar sesion</a>
+        <form method="post" action="{% url 'logout' %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit" class="link-pill">Cerrar sesión</button>
+        </form>
     </div>
 </nav>
 
