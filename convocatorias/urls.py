@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home_view, name='home'),
+    path('c', views.home_view, name='home'),
     path('login/', views.login_view, name='login'),
     path('admin-acceso/', views.admin_logout_redirect_view, name='admin_logout_redirect'),  # ← cierra sesión y va al login admin
     path('recuperar-contrasena/', views.password_reset_view, name='password_reset'),
