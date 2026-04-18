@@ -548,14 +548,10 @@ def registro_view(request):
     return render(request, "convocatorias/registro.html", {"form": form})
 
 
+@require_POST
 def logout_view(request):
     if request.user.is_authenticated:
-        _registrar_auditoria(
-            request,
-            "logout",
-            "Cierre de sesion.",
-            usuario=request.user,
-        )
+        _registrar_auditoria(request, "logout", "Cierre de sesion.", usuario=request.user)
     logout(request)
     return redirect("login")
 
