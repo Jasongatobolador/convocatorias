@@ -521,9 +521,18 @@ def registro_view(request):
     if request.user.is_authenticated:
         # Si hay una sesion activa (usuario/trabajador/admin), cerrar para mostrar registro limpio.
         logout(request)
-
     form = RegistroForm(request.POST or None)
     if request.method == "POST":
+        ip = _get_client_ip(request)
+        desde = timezone.now() - timedelta(hours=1)
+        intentos_ip = EventoAuditoria.objects.filter(
+            evento="registro_usuario",
+            ip=ip,
+            fecha__gte=desde,
+        ).count()
+        if intentos_ip >= 5:
+            messages.error(request, "Demasiados registros desde esta IP. Intenta más tarde.")
+            return render(request, "convocatorias/registro.html", {"form": form})
         acepta_terminos = request.POST.get("acepta_terminos") == "on"
         if not acepta_terminos:
             messages.error(
@@ -544,7 +553,6 @@ def registro_view(request):
             messages.success(request, "Cuenta creada correctamente.")
             return redirect("lista_convocatorias")
         messages.error(request, "Revisa los datos del formulario.")
-
     return render(request, "convocatorias/registro.html", {"form": form})
 
 
