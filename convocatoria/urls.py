@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('Direcion-del-desarrollo-económico sostenible/', admin.site.urls),
     path('', include('convocatorias.urls')),
 ]
 
