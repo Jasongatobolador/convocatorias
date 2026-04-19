@@ -65,7 +65,8 @@ class SecurityHeadersMiddleware:
         response = self.get_response(request)
         response["Content-Security-Policy"] = self.CSP
         response["Permissions-Policy"] = self.PERMISSIONS_POLICY
-
+        response["X-Permitted-Cross-Domain-Policies"] = "none"
+        
         static_prefix = getattr(settings, "STATIC_URL", "/static/")
         media_prefix = getattr(settings, "MEDIA_URL", "/media/")
         path = getattr(request, "path", "")
