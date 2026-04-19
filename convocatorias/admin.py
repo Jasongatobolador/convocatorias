@@ -336,6 +336,19 @@ class TrabajadorPerfilAdmin(admin.ModelAdmin):
                 campos.append("password")
             obj.usuario.save(update_fields=campos)
         super().save_model(request, obj, form, change)
+
+        
+        def delete_model(self, request, obj):
+            usuario = obj.usuario
+            super().delete_model(request, obj)
+            usuario.delete()
+        def delete_queryset(self, request, queryset):
+            usuarios = list(queryset.values_list("usuario", flat=True))
+            super().delete_queryset(request, queryset)
+            from django.contrib.auth import get_user_model
+            get_user_model().objects.filter(id__in=usuarios).delete()
+
+
 @admin.register(Area)
 class AreaAdmin(admin.ModelAdmin):
     # "activa" se mantiene en modelo y formulario; se oculta de lista/filtros
