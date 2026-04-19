@@ -1,9 +1,55 @@
 {% extends "admin/base.html" %}
 
-{% block title %}Área de Administración de Desarrollo Económico{% endblock %}
+{% block title %}Administración - Desarrollo Económico{% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
-    Área de Administración de Desarrollo Económico
+    Área de Administración
 </h1>
+{% endblock %}
+
+{% block nav-global %}
+<style>
+.theme-toggle-admin {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    z-index: 9999;
+}
+body.dark-admin { filter: invert(1) hue-rotate(180deg); }
+body.dark-admin img { filter: invert(1) hue-rotate(180deg); }
+</style>
+<button class="theme-toggle-admin" id="themeToggleAdmin" type="button">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+    </svg>
+    <span>Modo oscuro</span>
+</button>
+<script>
+(function(){
+    var btn = document.getElementById('themeToggleAdmin');
+    if (!btn) return;
+    var saved = sessionStorage.getItem('theme-admin');
+    if (saved === 'dark') {
+        document.body.classList.add('dark-admin');
+        btn.querySelector('span').textContent = 'Modo claro';
+    }
+    btn.addEventListener('click', function(){
+        var isDark = document.body.classList.toggle('dark-admin');
+        sessionStorage.setItem('theme-admin', isDark ? 'dark' : 'light');
+        btn.querySelector('span').textContent = isDark ? 'Modo claro' : 'Modo oscuro';
+    });
+})();
+</script>
 {% endblock %}
