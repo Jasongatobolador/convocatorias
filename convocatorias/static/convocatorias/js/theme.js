@@ -15,13 +15,13 @@
         }
     };
 
-    const saved = localStorage.getItem('theme');
+    const saved = sessionStorage.getItem('theme');
     setTheme(saved === 'dark' ? 'dark' : 'light');
 
     toggle.addEventListener('click', () => {
         const next = body.classList.contains('dark') ? 'light' : 'dark';
         body.classList.add('theme-fade');
-        localStorage.setItem('theme', next);
+        sessionStorage.setItem('theme', next);
         setTheme(next);
         setTimeout(() => body.classList.remove('theme-fade'), 220);
     });
