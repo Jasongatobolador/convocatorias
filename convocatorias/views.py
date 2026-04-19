@@ -118,7 +118,7 @@ def _final_user_required(request):
         return redirect("dashboard_trabajador")
     if request.user.is_authenticated and request.user.is_superuser:
         messages.error(request, "Acceso disponible solo para usuarios finales.")
-        return redirect("/admin/")
+        return redirect("/Direcion-del-desarrollo-economico-sostenible/")
     messages.error(request, "Debes iniciar sesion para continuar.")
     return redirect("login")
 
@@ -396,7 +396,7 @@ def admin_logout_redirect_view(request):
     """
     if request.user.is_authenticated:
         logout(request)
-    return redirect("/admin/login/")
+    return redirect("/Direcion-del-desarrollo-economico-sostenible/login/")
 
 
 def login_view(request):
@@ -453,7 +453,7 @@ def login_view(request):
                 datos={"email": email},
             )
             messages.error(request, "Tu cuenta es de administrador. Accede desde el panel admin.")
-            return redirect("/admin/login/")
+            return redirect("/Direcion-del-desarrollo-economico-sostenible/login/")
         _registrar_fallo_login_usuario(email, ip)
         _registrar_auditoria(
             request,
