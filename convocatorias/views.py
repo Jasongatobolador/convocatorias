@@ -1219,6 +1219,11 @@ def zona_usuario_view(request):
             messages.success(request, "Solicitud reenviada correctamente. Ahora aparece como pendiente.")
             return redirect("zona_usuario")
 
+        elif accion == "vaciar_notificaciones":
+            NotificacionUsuario.objects.filter(usuario=request.user).delete()
+            messages.success(request, "Notificaciones eliminadas correctamente.")
+            return redirect("zona_usuario")
+
     documentos_usuario = {
         documento.tipo: documento
         for documento in DocumentoUsuario.objects.filter(usuario=request.user, archivo_tamano__gt=0)
