@@ -44,18 +44,39 @@ class ConvocatoriaAdminForm(forms.ModelForm):
         fecha_inicio_recepcion = cleaned.get("fecha_inicio_recepcion")
         fecha_fin_recepcion = cleaned.get("fecha_fin_recepcion")
 
+        # ── Periodo de convocatoria ───────────────────────────────────────────
         if fecha_inicio and fecha_inicio < hoy:
             self.add_error("fecha_inicio", "La fecha de inicio no puede ser anterior a hoy.")
         if fecha_fin and fecha_fin < hoy:
             self.add_error("fecha_fin", "La fecha de fin no puede ser anterior a hoy.")
-        if fecha_inicio and fecha_fin and fecha_fin < fecha_inicio:
-            self.add_error("fecha_fin", "La fecha de fin no puede ser anterior a la fecha de inicio.")
+        if fecha_inicio and fecha_fin:
+            if fecha_fin < fecha_inicio:
+                self.add_error("fecha_fin", "La fecha de fin no puede ser anterior a la fecha de inicio.")
+            if fecha_fin == fecha_inicio:
+                self.add_error("fecha_fin", "La fecha de fin no puede ser igual a la fecha de inicio.")
+
+        # ── Periodo de recepcion de documentos ────────────────────────────────
         if fecha_inicio_recepcion and fecha_inicio_recepcion < hoy:
             self.add_error("fecha_inicio_recepcion", "La fecha de inicio de recepcion no puede ser anterior a hoy.")
         if fecha_fin_recepcion and fecha_fin_recepcion < hoy:
             self.add_error("fecha_fin_recepcion", "La fecha de fin de recepcion no puede ser anterior a hoy.")
-        if fecha_inicio_recepcion and fecha_fin_recepcion and fecha_fin_recepcion < fecha_inicio_recepcion:
-            self.add_error("fecha_fin_recepcion", "La fecha de fin de recepcion no puede ser anterior a la de inicio.")
+        if fecha_inicio_recepcion and fecha_fin_recepcion:
+            if fecha_fin_recepcion < fecha_inicio_recepcion:
+                self.add_error("fecha_fin_recepcion", "La fecha de fin de recepcion no puede ser anterior a la de inicio.")
+            if fecha_fin_recepcion == fecha_inicio_recepcion:
+                self.add_error("fecha_fin_recepcion", "La fecha de fin de recepcion no puede ser igual a la de inicio.")
+
+        # ── Recepcion no puede estar fuera del periodo de convocatoria ─────────
+        if fecha_inicio and fecha_inicio_recepcion and fecha_inicio_recepcion < fecha_inicio:
+            self.add_error(
+                "fecha_inicio_recepcion",
+                "La fecha de inicio de recepcion no puede ser anterior al inicio de la convocatoria.",
+            )
+        if fecha_fin and fecha_fin_recepcion and fecha_fin_recepcion > fecha_fin:
+            self.add_error(
+                "fecha_fin_recepcion",
+                "La fecha de fin de recepcion no puede ser posterior al fin de la convocatoria.",
+            )
 
         return cleaned
 
