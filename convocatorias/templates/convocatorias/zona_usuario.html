@@ -172,7 +172,19 @@
     </section>
 
     <section class="panel-simple">
-        <h2>Notificaciones</h2>
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+            <h2 style="margin:0">Notificaciones</h2>
+            {% if notificaciones %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="vaciar_notificaciones">
+                <button type="submit" class="btn btn-user btn-small"
+                    onclick="return confirm('¿Eliminar todas las notificaciones?')">
+                    Vaciar notificaciones
+                </button>
+            </form>
+            {% endif %}
+        </div>
         {% for solicitud in solicitudes_reenviar %}
             <div class="document-row document-row-spaced">
                 <div class="document-info">
