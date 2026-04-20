@@ -569,6 +569,12 @@ def lista_convocatorias(request):
     guard = _final_user_required(request)
     if guard:
         return guard
+
+    # ── Auto-desactivar convocatorias cuya fecha_fin ya pasó ─────────────────
+    hoy = timezone.localdate()
+    Convocatoria.objects.filter(activa=True, fecha_fin__lt=hoy).update(activa=False)
+    # ─────────────────────────────────────────────────────────────────────────
+
     convocatorias = (
         Convocatoria.objects.filter(activa=True)
         .annotate(
