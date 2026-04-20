@@ -34,6 +34,31 @@ class ConvocatoriaAdminForm(forms.ModelForm):
             "documentos_requeridos",
         )
 
+    def clean(self):
+        cleaned = super().clean()
+        from django.utils import timezone
+        hoy = timezone.localdate()
+
+        fecha_inicio = cleaned.get("fecha_inicio")
+        fecha_fin = cleaned.get("fecha_fin")
+        fecha_inicio_recepcion = cleaned.get("fecha_inicio_recepcion")
+        fecha_fin_recepcion = cleaned.get("fecha_fin_recepcion")
+
+        if fecha_inicio and fecha_inicio < hoy:
+            self.add_error("fecha_inicio", "La fecha de inicio no puede ser anterior a hoy.")
+        if fecha_fin and fecha_fin < hoy:
+            self.add_error("fecha_fin", "La fecha de fin no puede ser anterior a hoy.")
+        if fecha_inicio and fecha_fin and fecha_fin < fecha_inicio:
+            self.add_error("fecha_fin", "La fecha de fin no puede ser anterior a la fecha de inicio.")
+        if fecha_inicio_recepcion and fecha_inicio_recepcion < hoy:
+            self.add_error("fecha_inicio_recepcion", "La fecha de inicio de recepcion no puede ser anterior a hoy.")
+        if fecha_fin_recepcion and fecha_fin_recepcion < hoy:
+            self.add_error("fecha_fin_recepcion", "La fecha de fin de recepcion no puede ser anterior a hoy.")
+        if fecha_inicio_recepcion and fecha_fin_recepcion and fecha_fin_recepcion < fecha_inicio_recepcion:
+            self.add_error("fecha_fin_recepcion", "La fecha de fin de recepcion no puede ser anterior a la de inicio.")
+
+        return cleaned
+
 
 class ConvocatoriaDocumentoConfiguracionInlineFormSet(BaseInlineFormSet):
     def clean(self):
@@ -337,16 +362,16 @@ class TrabajadorPerfilAdmin(admin.ModelAdmin):
             obj.usuario.save(update_fields=campos)
         super().save_model(request, obj, form, change)
 
-        
-        def delete_model(self, request, obj):
-            usuario = obj.usuario
-            super().delete_model(request, obj)
-            usuario.delete()
-        def delete_queryset(self, request, queryset):
-            usuarios = list(queryset.values_list("usuario", flat=True))
-            super().delete_queryset(request, queryset)
-            from django.contrib.auth import get_user_model
-            get_user_model().objects.filter(id__in=usuarios).delete()
+    def delete_model(self, request, obj):
+        usuario = obj.usuario
+        super().delete_model(request, obj)
+        usuario.delete()
+
+    def delete_queryset(self, request, queryset):
+        from django.contrib.auth import get_user_model
+        usuarios_ids = list(queryset.values_list("usuario_id", flat=True))
+        super().delete_queryset(request, queryset)
+        get_user_model().objects.filter(id__in=usuarios_ids).delete()
 
 
 @admin.register(Area)
