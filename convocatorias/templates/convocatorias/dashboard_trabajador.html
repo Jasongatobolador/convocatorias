@@ -10,6 +10,19 @@
 </head>
 <body class="trabajador">
 
+<!-- BANNER DE AVISO DE SESIÓN -->
+<div id="session-warn" style="display:none; position:sticky; top:0; z-index:999;
+  background:#FAEEDA; color:#854F0B; padding:10px 20px;
+  align-items:center; justify-content:center; gap:12px;
+  border-bottom: 1px solid #FAC775; font-size:14px;">
+  Tu sesión expira en 5 minutos por inactividad. Guarda tu trabajo.
+  <button onclick="document.getElementById('session-warn').style.display='none'"
+    style="background:none; border:1px solid #854F0B; color:#854F0B;
+    padding:4px 10px; border-radius:6px; cursor:pointer; font-size:13px;">
+    Entendido
+  </button>
+</div>
+
 <nav class="topbar">
     <div class="brand">
         <img src="{% static 'convocatorias/img/logo-ayuntamiento.png' %}" alt="Ayuntamiento de Acapulco">
@@ -102,6 +115,37 @@
         </div>
     </section>
 </main>
+
+<script>
+(function () {
+  const TIMEOUT_MIN = 30;
+  const WARN_MIN = 5;
+  const WARN_MS = (TIMEOUT_MIN - WARN_MIN) * 60 * 1000;
+
+  let warned = false;
+  let lastActivity = Date.now();
+
+  function resetTimer() {
+    lastActivity = Date.now();
+    warned = false;
+    var banner = document.getElementById("session-warn");
+    if (banner) banner.style.display = "none";
+  }
+
+  ["click", "keydown", "mousemove", "scroll"].forEach(function (ev) {
+    document.addEventListener(ev, resetTimer, { passive: true });
+  });
+
+  setInterval(function () {
+    var elapsed = Date.now() - lastActivity;
+    if (!warned && elapsed >= WARN_MS) {
+      warned = true;
+      var banner = document.getElementById("session-warn");
+      if (banner) banner.style.display = "flex";
+    }
+  }, 10000);
+})();
+</script>
 
 </body>
 </html>
