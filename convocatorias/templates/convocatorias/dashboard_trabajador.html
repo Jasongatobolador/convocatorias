@@ -7,35 +7,94 @@
     <title>Panel trabajador</title>
     <link rel="stylesheet" href="{% static 'convocatorias/CSS/shared.css' %}">
     <link rel="stylesheet" href="{% static 'convocatorias/CSS/trabajador.css' %}">
+    <style>
+        #session-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.65);
+            align-items: center;
+            justify-content: center;
+        }
+        #session-overlay.visible {
+            display: flex;
+        }
+        #session-box {
+            background: linear-gradient(160deg, rgba(40, 10, 10, 0.97), rgba(20, 5, 5, 0.99));
+            border: 1px solid rgba(212, 175, 55, 0.8);
+            border-radius: 16px;
+            padding: 2.2rem 2rem;
+            max-width: 360px;
+            width: 90%;
+            text-align: center;
+            color: #f7e9d5;
+        }
+        #session-box h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #d8b24a;
+            margin: 0 0 0.6rem;
+        }
+        #session-box p {
+            font-size: 0.9rem;
+            color: rgba(247, 233, 213, 0.75);
+            margin: 0 0 1.2rem;
+            line-height: 1.5;
+        }
+        #session-num {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #d8b24a;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+        #session-seg {
+            font-size: 0.85rem;
+            color: rgba(247, 233, 213, 0.6);
+            margin-bottom: 1.8rem;
+        }
+        .session-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .session-btns .btn-si {
+            background: linear-gradient(180deg, #d8b24a, #c09a2f);
+            color: #6f2a2a;
+            border: none;
+            border-radius: 30px;
+            padding: 11px 24px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            letter-spacing: 0.2px;
+        }
+        .session-btns .btn-no {
+            background: transparent;
+            border: 1px solid rgba(212, 175, 55, 0.6);
+            color: #f7e9d5;
+            border-radius: 30px;
+            padding: 11px 24px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="trabajador">
 
-<!-- MODAL DE ADVERTENCIA DE SESIÓN -->
-<div id="session-modal-overlay" style="display:none; position:fixed; inset:0; z-index:9999;
-  background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-  <div style="background:#fff; border-radius:12px; padding:2rem; max-width:380px; width:90%;
-    text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-    <div style="font-size:2.5rem; margin-bottom:0.5rem;">⏱️</div>
-    <h2 style="font-size:1.1rem; font-weight:600; color:#1a1a1a; margin-bottom:0.5rem;">
-      ¿Sigues ahí?
-    </h2>
-    <p style="font-size:0.9rem; color:#555; margin-bottom:1rem; line-height:1.5;">
-      Tu sesión se cerrará automáticamente en
-    </p>
-    <div id="session-countdown" style="font-size:2.5rem; font-weight:700; color:#854F0B;
-      margin-bottom:0.25rem;">60</div>
-    <p style="font-size:0.85rem; color:#888; margin-bottom:1.5rem;">segundos</p>
-    <div style="display:flex; gap:10px; justify-content:center;">
-      <button onclick="keepAlive()" style="background:#1a6b3c; color:#fff; border:none;
-        padding:10px 20px; border-radius:8px; font-size:0.9rem; cursor:pointer; font-weight:500;">
-        Sí, sigo aquí
-      </button>
-      <button onclick="forceLogout()" style="background:none; color:#888; border:1px solid #ddd;
-        padding:10px 20px; border-radius:8px; font-size:0.9rem; cursor:pointer;">
-        Cerrar sesión
-      </button>
+<!-- MODAL DE SESIÓN — solo aparece cuando el tiempo está por agotarse -->
+<div id="session-overlay">
+    <div id="session-box">
+        <h2>¿Sigues ahí?</h2>
+        <p>Tu sesión se cerrará automáticamente en</p>
+        <div id="session-num">60</div>
+        <div id="session-seg">segundos</div>
+        <div class="session-btns">
+            <button class="btn-si" onclick="keepAlive()">Sí, sigo aquí</button>
+            <button class="btn-no" onclick="forceLogout()">Cerrar sesión</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <nav class="topbar">
@@ -133,17 +192,17 @@
 
 <script>
 (function () {
-  var TIMEOUT_MS  = 30 * 60 * 1000;          // 30 minutos total de sesión
-  var WARN_BEFORE = 60 * 1000;               // avisa 60 seg antes de expirar
-  var WARN_AT_MS  = TIMEOUT_MS - WARN_BEFORE; // modal aparece a los 29 min
+  var TIMEOUT_MS  = 30 * 60 * 1000;
+  var WARN_BEFORE = 60 * 1000;
+  var WARN_AT_MS  = TIMEOUT_MS - WARN_BEFORE;
 
-  var lastActivity     = Date.now();
-  var modalShown       = false;
+  var lastActivity      = Date.now();
+  var modalShown        = false;
   var countdownInterval = null;
-  var overlay          = document.getElementById("session-modal-overlay");
-  var countdownEl      = document.getElementById("session-countdown");
 
-  // Resetea el timer mientras el trabajador interactúa
+  var overlay     = document.getElementById("session-overlay");
+  var countdownEl = document.getElementById("session-num");
+
   function resetTimer() {
     if (modalShown) return;
     lastActivity = Date.now();
@@ -153,7 +212,6 @@
     document.addEventListener(ev, resetTimer, { passive: true });
   });
 
-  // Revisa cada 5 seg si hay que mostrar el modal
   setInterval(function () {
     if (!modalShown && (Date.now() - lastActivity) >= WARN_AT_MS) {
       showModal();
@@ -162,7 +220,7 @@
 
   function showModal() {
     modalShown = true;
-    overlay.style.display = "flex";
+    overlay.classList.add("visible");
     var secsLeft = 60;
     countdownEl.textContent = secsLeft;
 
@@ -178,26 +236,22 @@
 
   function hideModal() {
     modalShown = false;
-    overlay.style.display = "none";
+    overlay.classList.remove("visible");
     clearInterval(countdownInterval);
     countdownEl.textContent = 60;
   }
 
-  // Botón "Sí, sigo aquí"
   window.keepAlive = function () {
     hideModal();
     lastActivity = Date.now();
-    // Ping silencioso al servidor para renovar la sesión
     fetch(window.location.href, { method: "GET", credentials: "same-origin" })
       .catch(function () {});
   };
 
-  // Botón "Cerrar sesión" o cuenta regresiva terminada
   window.forceLogout = function () {
     hideModal();
     document.getElementById("logout-form").submit();
   };
-
 })();
 </script>
 
