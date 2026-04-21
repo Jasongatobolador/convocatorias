@@ -1440,7 +1440,7 @@ def password_reset_view(request):
                     mensaje,
                     settings.DEFAULT_FROM_EMAIL,
                     [email],
-                    fail_silently=False,
+                    fail_silently=True,
                 )
             except Exception as mail_exc:
                 import logging
