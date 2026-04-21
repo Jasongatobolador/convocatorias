@@ -10,17 +10,32 @@
 </head>
 <body class="trabajador">
 
-<!-- BANNER DE AVISO DE SESIÓN -->
-<div id="session-warn" style="display:none; position:sticky; top:0; z-index:999;
-  background:#FAEEDA; color:#854F0B; padding:10px 20px;
-  align-items:center; justify-content:center; gap:12px;
-  border-bottom: 1px solid #FAC775; font-size:14px;">
-  Tu sesión expira en 5 minutos por inactividad. Guarda tu trabajo.
-  <button onclick="document.getElementById('session-warn').style.display='none'"
-    style="background:none; border:1px solid #854F0B; color:#854F0B;
-    padding:4px 10px; border-radius:6px; cursor:pointer; font-size:13px;">
-    Entendido
-  </button>
+<!-- MODAL DE ADVERTENCIA DE SESIÓN -->
+<div id="session-modal-overlay" style="display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:12px; padding:2rem; max-width:380px; width:90%;
+    text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-size:2.5rem; margin-bottom:0.5rem;">⏱️</div>
+    <h2 style="font-size:1.1rem; font-weight:600; color:#1a1a1a; margin-bottom:0.5rem;">
+      ¿Sigues ahí?
+    </h2>
+    <p style="font-size:0.9rem; color:#555; margin-bottom:1rem; line-height:1.5;">
+      Tu sesión se cerrará automáticamente en
+    </p>
+    <div id="session-countdown" style="font-size:2.5rem; font-weight:700; color:#854F0B;
+      margin-bottom:0.25rem;">60</div>
+    <p style="font-size:0.85rem; color:#888; margin-bottom:1.5rem;">segundos</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button onclick="keepAlive()" style="background:#1a6b3c; color:#fff; border:none;
+        padding:10px 20px; border-radius:8px; font-size:0.9rem; cursor:pointer; font-weight:500;">
+        Sí, sigo aquí
+      </button>
+      <button onclick="forceLogout()" style="background:none; color:#888; border:1px solid #ddd;
+        padding:10px 20px; border-radius:8px; font-size:0.9rem; cursor:pointer;">
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
 </div>
 
 <nav class="topbar">
@@ -30,7 +45,7 @@
     </div>
     <div class="topbar-actions">
         <a class="link-pill" href="{% url 'dashboard_trabajador' %}">Dashboard</a>
-        <form method="post" action="{% url 'logout' %}" style="display:inline">
+        <form method="post" action="{% url 'logout' %}" style="display:inline" id="logout-form">
             {% csrf_token %}
             <button type="submit" class="link-pill">Cerrar sesión</button>
         </form>
@@ -118,32 +133,71 @@
 
 <script>
 (function () {
-  const TIMEOUT_MIN = 30;
-  const WARN_MIN = 5;
-  const WARN_MS = (TIMEOUT_MIN - WARN_MIN) * 60 * 1000;
+  var TIMEOUT_MS  = 30 * 60 * 1000;          // 30 minutos total de sesión
+  var WARN_BEFORE = 60 * 1000;               // avisa 60 seg antes de expirar
+  var WARN_AT_MS  = TIMEOUT_MS - WARN_BEFORE; // modal aparece a los 29 min
 
-  let warned = false;
-  let lastActivity = Date.now();
+  var lastActivity     = Date.now();
+  var modalShown       = false;
+  var countdownInterval = null;
+  var overlay          = document.getElementById("session-modal-overlay");
+  var countdownEl      = document.getElementById("session-countdown");
 
+  // Resetea el timer mientras el trabajador interactúa
   function resetTimer() {
+    if (modalShown) return;
     lastActivity = Date.now();
-    warned = false;
-    var banner = document.getElementById("session-warn");
-    if (banner) banner.style.display = "none";
   }
 
   ["click", "keydown", "mousemove", "scroll"].forEach(function (ev) {
     document.addEventListener(ev, resetTimer, { passive: true });
   });
 
+  // Revisa cada 5 seg si hay que mostrar el modal
   setInterval(function () {
-    var elapsed = Date.now() - lastActivity;
-    if (!warned && elapsed >= WARN_MS) {
-      warned = true;
-      var banner = document.getElementById("session-warn");
-      if (banner) banner.style.display = "flex";
+    if (!modalShown && (Date.now() - lastActivity) >= WARN_AT_MS) {
+      showModal();
     }
-  }, 10000);
+  }, 5000);
+
+  function showModal() {
+    modalShown = true;
+    overlay.style.display = "flex";
+    var secsLeft = 60;
+    countdownEl.textContent = secsLeft;
+
+    countdownInterval = setInterval(function () {
+      secsLeft--;
+      countdownEl.textContent = secsLeft;
+      if (secsLeft <= 0) {
+        clearInterval(countdownInterval);
+        forceLogout();
+      }
+    }, 1000);
+  }
+
+  function hideModal() {
+    modalShown = false;
+    overlay.style.display = "none";
+    clearInterval(countdownInterval);
+    countdownEl.textContent = 60;
+  }
+
+  // Botón "Sí, sigo aquí"
+  window.keepAlive = function () {
+    hideModal();
+    lastActivity = Date.now();
+    // Ping silencioso al servidor para renovar la sesión
+    fetch(window.location.href, { method: "GET", credentials: "same-origin" })
+      .catch(function () {});
+  };
+
+  // Botón "Cerrar sesión" o cuenta regresiva terminada
+  window.forceLogout = function () {
+    hideModal();
+    document.getElementById("logout-form").submit();
+  };
+
 })();
 </script>
 
