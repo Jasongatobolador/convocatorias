@@ -1424,6 +1424,7 @@ def password_reset_view(request):
         user = get_user_model().objects.filter(username=email, is_active=True).first()
         if user and _user_is_final(user):
             codigo = _generar_codigo_reset()
+            PasswordResetCode.objects.filter(usuario=user, usado=False).update(usado=True)
             PasswordResetCode.objects.create(
                 usuario=user,
                 codigo="",
