@@ -65,6 +65,8 @@ class SecurityHeadersMiddleware:
         response = self.get_response(request)
         response["Content-Security-Policy"] = self.CSP
         response["Permissions-Policy"] = self.PERMISSIONS_POLICY
+        response["X-Frame-Options"] = "SAMEORIGIN"
+        response["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response["X-Permitted-Cross-Domain-Policies"] = "none"
         
         static_prefix = getattr(settings, "STATIC_URL", "/static/")
