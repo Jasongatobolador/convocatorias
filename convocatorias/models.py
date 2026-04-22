@@ -20,8 +20,8 @@ class Area(models.Model):
 
     class Meta:
         ordering = ["nombre"]
-        verbose_name = "Area"
-        verbose_name_plural = "Areas"
+        verbose_name = "Área"
+        verbose_name_plural = "Áreas"
 
     def __str__(self):
         return self.nombre
